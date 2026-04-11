@@ -3,15 +3,23 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-  <title>Марина в огне · v2.0 (canary)</title>
-  <meta name="description" content="Текстовая игра в мессенджере про первые 12 дней фаундера. От Тима Зинина."/>
-  <meta property="og:title" content="Марина в огне"/>
-  <meta property="og:description" content="Текстовая игра в мессенджере про первые 12 дней фаундера."/>
+  <title>🔥 Марина в огне — survival-мессенджер про 30 дней фаундера</title>
+  <meta name="description" content="Текстовая игра в мессенджере. 30 дней, $500, три проекта, одна абсурдная хозяйка и один Тиндер-Кирилл. Выживи первый месяц как фаундер. 15-20 минут, бесплатно."/>
+  <meta property="og:site_name" content="timzinin.com"/>
+  <meta property="og:title" content="🔥 Марина в огне — survival про 30 дней фаундера"/>
+  <meta property="og:description" content="Текстовая игра в мессенджере. 30 дней, $500, три проекта. Хозяйка абсурдная, Тиндер-Кирилл настойчивый, счёт могут заблокировать по 115-ФЗ. 15-20 минут."/>
   <meta property="og:type" content="website"/>
-  <meta property="og:url" content="https://timzinin.com/marina-next/"/>
-  <meta name="twitter:card" content="summary"/>
+  <meta property="og:url" content="https://timzinin.com/marina-next/play.html"/>
+  <meta property="og:image" content="https://timzinin.com/marina-next/img/hero/hero_main.webp"/>
+  <meta property="og:image:width" content="1536"/>
+  <meta property="og:image:height" content="1024"/>
+  <meta property="og:image:alt" content="Марина за ноутбуком в ночной квартире — key art"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="🔥 Марина в огне — survival-мессенджер"/>
+  <meta name="twitter:description" content="30 дней, $500, три проекта. Выживи первый месяц как фаундер. 15-20 мин, бесплатно."/>
+  <meta name="twitter:image" content="https://timzinin.com/marina-next/img/hero/hero_main.webp"/>
   <link rel="icon" href="favicon.ico"/>
-  <link rel="stylesheet" type="text/css" href="css/marina.css"/>
+  <link rel="stylesheet" type="text/css" href="css/marina.css?v=2.1.1"/>
 
   <!-- This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0. -->
   <!-- Forked from A Dark Room by Michael Townsend (doublespeakgames/adarkroom). -->
@@ -88,7 +96,7 @@
             </div>
             <div class="brand-text">
               <div class="brand-title">🔥 Марина в огне</div>
-              <div class="brand-subtitle">теледрам v2.0b2</div>
+              <div class="brand-subtitle">теледрам v2.1.1</div>
             </div>
           </div>
           <div id="contacts-status" class="status-mini"></div>
@@ -108,6 +116,7 @@
           <div id="chat-title">—</div>
           <div id="chat-subtitle"></div>
         </div>
+        <div id="chat-pinned"></div>
         <div id="chat-thread" aria-live="polite"></div>
         <div id="chat-typing" class="typing-indicator" style="display:none;">
           <span class="t-dot"></span><span class="t-dot"></span><span class="t-dot"></span>
@@ -117,17 +126,18 @@
       </section>
     </div>
 
-    <!-- Global action dock (always visible) -->
+    <!-- Global action dock (always visible + top resource HUD above buttons) -->
     <nav id="action-dock" role="navigation">
+      <div id="resource-hud" class="resource-hud"></div>
       <div class="dock-topbar">
-        <div class="dock-label">день <span id="dock-day">1</span> / 12 · <span id="dock-hours">8</span>h · $<span id="dock-cash">500</span> · <span id="dock-leads">0</span>l · <span id="dock-qualified">0</span>q · <span id="dock-done">0</span>/3 ✓</div>
-        <button id="audio-toggle" type="button" title="звук вкл/выкл" aria-label="аудио">🔇</button>
+        <div class="dock-hint">действия</div>
+        <button id="audio-toggle" type="button" title="музыка вкл/выкл" aria-label="музыка">🔊</button>
       </div>
       <div class="dock-buttons" id="dock-buttons"></div>
     </nav>
 
     <footer id="footer">
-      v2.0a canary · <a id="reset-link" href="#" title="начать заново">reset</a> ·
+      v2.1.0 survival · <a id="reset-link" href="#" title="начать заново">reset</a> ·
       <a href="/marina/" style="color:#7a7a7a;">terminal v1.6a</a> ·
       <a href="/marina-terminal/" style="color:#7a7a7a;">archive</a> ·
       source → <a href="https://github.com/TimmyZinin/marina-v-ogne" target="_blank" rel="noopener">github</a>
@@ -136,9 +146,9 @@
 
   </div>
 
-  <script src="script/lead.js"></script>
-  <script src="script/marina-audio.js"></script>
-  <script src="script/bubbles.js"></script>
-  <script src="script/marina.js"></script>
+  <script src="script/lead.js?v=2.1.1"></script>
+  <script src="script/marina-audio.js?v=2.1.1"></script>
+  <script src="script/bubbles.js?v=2.1.1"></script>
+  <script src="script/marina.js?v=2.1.1"></script>
 </body>
 </html>

@@ -30,13 +30,10 @@
    *   kind: 'incoming' | 'outgoing' | 'system' | 'bank'
    *   photo: 'img/events/filename.webp' (optional)
    */
-  function renderBubble(threadId, msg) {
-    // Only render if this is the currently visible chat
-    if (window.Marina && window.Marina.currentChat && window.Marina.currentChat() !== threadId) {
-      return;
-    }
-    var $thread = $('#chat-thread');
+  // Build a single bubble element — shared by live render + replay
+  function buildBubble(threadId, msg) {
     var $b = $('<div class="bubble">').addClass(msg.kind || 'incoming');
+    if (threadId) $b.attr('data-from', threadId);
 
     if (msg.kind === 'bank') {
       // Bank notification card
@@ -50,11 +47,9 @@
       var $desc = $('<div>').text(msg.text || '');
       $b.append($head).append($amount).append($desc);
     } else {
-      // Regular bubble
       if (msg.senderName && msg.kind === 'incoming') {
         $b.append($('<span class="sender-name">').text(msg.senderName));
       }
-      // Photo attachment (if any)
       if (msg.photo) {
         var $photoWrap = $('<div class="bubble-photo">');
         var $img = $('<img>')
@@ -74,8 +69,18 @@
       $b.append($('<span class="time">').text(msg.time));
     }
 
-    $thread.append($b);
-    scrollToBottom();
+    return $b;
+  }
+
+  function renderBubble(threadId, msg) {
+    // Only render if this is the currently visible chat
+    if (window.Marina && window.Marina.currentChat && window.Marina.currentChat() !== threadId) {
+      return;
+    }
+    var $b = buildBubble(threadId, msg);
+    // SPRINT 06 — newest-first: prepend instead of append
+    $('#chat-thread').prepend($b);
+    scrollToTop();
   }
 
   /**
@@ -100,45 +105,21 @@
   function replayThread(state, threadId) {
     var $thread = $('#chat-thread').empty();
     var msgs = state.threads[threadId] || [];
-    msgs.forEach(function (msg) {
-      var $b = $('<div class="bubble">').addClass(msg.kind || 'incoming');
-      if (msg.kind === 'bank') {
-        var $head = $('<div class="bank-header">').text(msg.meta && msg.meta.bank_name || 'Т-Банк');
-        var $amount = $('<div class="bank-amount">');
-        if (msg.meta && typeof msg.meta.amount === 'number') {
-          var sign = msg.meta.amount >= 0 ? '+' : '';
-          $amount.text(sign + '$' + msg.meta.amount);
-          $amount.addClass(msg.meta.amount >= 0 ? 'pos' : 'neg');
-        }
-        var $desc = $('<div>').text(msg.text || '');
-        $b.append($head).append($amount).append($desc);
-      } else {
-        if (msg.senderName && msg.kind === 'incoming') {
-          $b.append($('<span class="sender-name">').text(msg.senderName));
-        }
-        if (msg.photo) {
-          var $photoWrap = $('<div class="bubble-photo">');
-          var $img = $('<img>')
-            .attr('src', msg.photo)
-            .attr('alt', msg.photoAlt || 'вложение')
-            .attr('loading', 'lazy')
-            .on('error', function () { $photoWrap.html('<div class="bubble-photo-err">[📷 вложение недоступно]</div>'); });
-          $photoWrap.append($img);
-          $b.append($photoWrap);
-        }
-        if (msg.text) {
-          $b.append(document.createTextNode(msg.text));
-        }
-      }
-      if (msg.time) $b.append($('<span class="time">').text(msg.time));
-      $thread.append($b);
-    });
-    scrollToBottom();
+    // SPRINT 06 — newest-first: iterate from end backwards + append (so newest ends up on top)
+    for (var i = msgs.length - 1; i >= 0; i--) {
+      $thread.append(buildBubble(threadId, msgs[i]));
+    }
+    scrollToTop();
   }
 
   function scrollToBottom() {
     var el = document.getElementById('chat-thread');
     if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  function scrollToTop() {
+    var el = document.getElementById('chat-thread');
+    if (el) el.scrollTop = 0;
   }
 
   /**
@@ -177,11 +158,14 @@
     var filterIds = null;
     if (folder === 'team') filterIds = ['lena', 'anna', 'tim'];
     else if (folder === 'money') filterIds = ['bank', 'khozyaika', 'pavel', 'mama'];
+    // folder === 'all' shows EVERYTHING visible including spam (SPRINT 06)
+    var hideSpamInAll = false;
 
     var anyRendered = false;
     state.contacts.forEach(function (c) {
       if (!c.visible) return;
       if (filterIds && filterIds.indexOf(c.id) === -1) return;
+      if (hideSpamInAll && c.spam) return; // «все» folder hides spam group
       anyRendered = true;
 
       var $item = $('<div class="contact-item">').attr('data-contact', c.id);
@@ -210,6 +194,7 @@
       var emptyTexts = {
         team: 'команда ещё не собрана · продолжай искать клиентов',
         money: 'в папке «деньги» пока только банк',
+        spam: 'пока тихо · спам ещё не посыпался',
         all: 'пусто · продолжай играть'
       };
       $list.append($('<div class="folder-empty-state">').text(emptyTexts[folder] || 'пусто'));
@@ -266,7 +251,7 @@
     $('#chat-title').text(contact ? contact.name : '—');
     var sub = '';
     if (contact) {
-      if (contact.id === 'tim')       sub = 'консультант · каш, турция';
+      if (contact.id === 'tim')       sub = 'создатель игры · каш, турция';
       else if (contact.id === 'lena') sub = 'бывшая коллега · москва';
       else if (contact.id === 'anna') sub = 'первый клиент';
       else if (contact.id === 'bank') sub = 'Т-Банк · входящие уведомления';
@@ -274,9 +259,23 @@
       else if (contact.id === 'pavel') sub = 'бывший · 4 месяца тишины';
       else if (contact.id === 'mama')  sub = 'мама · всегда на связи';
       else if (contact.id === 'denis') sub = 'Денис · тусовщик';
+      // new spam contacts
+      else if (contact.id === 'olya')  sub = '11-Б · клуб женщин';
+      else if (contact.id === 'kirill') sub = 'Tinder · угощает';
+      else if (contact.id === 'krypta') sub = 'не знает как тебя зовут';
+      else if (contact.id === 'artur') sub = 'бывший босс';
+      else if (contact.id === 'vera')  sub = 'училка · одноклассники';
+      else if (contact.id === 'sosed') sub = 'квартира 23';
+      else if (contact.id === 'lyuda') sub = 'случайный номер';
+      else if (contact.id === 'ozon')  sub = 'ваш заказ?';
+      else if (contact.id === 'taxi')  sub = 'случайный таксист';
+      else if (contact.id === 'student') sub = 'диплом горит';
+      else if (contact.id === 'katya') sub = 'Катя с работы';
+      else if (contact.id === 'teshcha') sub = 'свекровь кого-то';
+      else if (contact.id === 'marathon') sub = 'эзотерический клуб';
       else if (contact.id === 'scratch') sub = 'личные заметки';
       if (contact.online) sub += ' · в сети';
-      else if (sub && contact.id !== 'bank' && contact.id !== 'scratch') sub += ' · был(а) недавно';
+      else if (sub && contact.id !== 'bank' && contact.id !== 'scratch' && !contact.spam) sub += ' · был(а) недавно';
     }
     $('#chat-subtitle').text(sub);
   }
