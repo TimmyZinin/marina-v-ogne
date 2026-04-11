@@ -1,9 +1,2 @@
-/.settings
-*.TODO
-*.mo
-*.swp
-.idea
-lang/.DS_Store
-.DS_Store
-node_modules
-img/Thumbs.db
+NOTES.md
+.playwright-cli/
