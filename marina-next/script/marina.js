@@ -14,7 +14,7 @@
 
   // ========== constants ==========
 
-  var VERSION = '2.1.1';
+  var VERSION = '2.2.3';
   var STATE_KEY = 'marina-fire:v2.0:state';
   var VERSION_KEY = 'marina-fire:v2.0:version';
   var OLD_KEYS = [
@@ -41,7 +41,7 @@
     eat_out:         { h: 1, c: 35, f: 45, m: 8 },
     shopping:        { h: 2, c: 80, m: 25 },
     date_kirill:     { h: 3, e: 10, f: 50, m: 15 }, // free food but energy drain
-    hangout_denis:   { h: 4, c: 150, f: 30, m: 20, ePlus: 15 },
+    // hangout_denis: removed — Denis uses per-event pricing via DENIS_COSTS in chat chips
     end_day:         { h: 0, e: 0 }
   };
 
@@ -146,6 +146,80 @@
     'регата вышла. ветер, брызги, Денис рулит, я смеюсь как ребёнок'
   ];
 
+  // SPRINT 12 — Marina's morning inner monologue when resources are critical
+  var HUNGRY_MORNINGS = [
+    'проспала будильник. живот жжёт — три дня на кофе и доширке',
+    'проснулась и сразу захотелось мяса. реального, не соевого. ничего в холодильнике',
+    'голова кружится когда встаёшь. надо что-то съесть нормальное, иначе я не вытяну',
+    'забыла как меня зовут пару секунд. это нормально? это от голода?',
+    'утро. сижу в кухне, смотрю на пустой холодильник, планирую оптимальную закупку на $10'
+  ];
+
+  var TIRED_MORNINGS = [
+    'будильник в 8:30. в 10:45 всё ещё в кровати. руки как ватные',
+    'проснулась с чувством что я пробежала марафон во сне. ничего не сделала за неделю',
+    'кофе третьей заварки. глаза закрываются сами. мне нужен день тишины, но его нет',
+    'меня кто-то выпил. физически. лежу, смотрю в потолок, считаю трещины',
+    'сколько можно вставать уставшей. это уже не усталость — это метаморфоза'
+  ];
+
+  var SAD_MORNINGS = [
+    'проснулась без причины в 5 утра. всё тихо и мне грустно, но я не знаю почему',
+    'хочу позвонить маме и не могу. не знаю что сказать кроме «всё плохо»',
+    'читаю свои старые посты в телеграм и не узнаю ту девочку. когда я стала такой',
+    'плачу в душе. ничего особенного не случилось. просто накопилось',
+    'утро. смотрю в зеркало. кто этот человек. серьёзно'
+  ];
+
+  var FINE_MORNINGS = [
+    'проснулась до будильника. что за фокус',
+    'кофе, солнце в окне, три мысли в голове вместо ста. редкое утро',
+    'чувствую себя живой сегодня. спасибо вчерашнему ужину',
+    'утро из тех когда я могу',
+    'сегодня получится. я это чувствую'
+  ];
+
+  // SPRINT 14 — Hungry work text (used when hunger < 50)
+  var WORK_TEXT_HUNGRY = [
+    'пытаюсь писать. буквы расплываются. когда я ела в последний раз?',
+    'делаю правки. трижды перечитываю одно предложение. голова не работает',
+    'работа идёт в два раза медленнее. желудок урчит как трактор',
+    'сижу и смотрю на экран. мысли не складываются. надо поесть'
+  ];
+
+  // SPRINT 14 — Night work hangover morning
+  var HANGOVER_MORNINGS = [
+    'проснулась в 11. голова как чугун. кофе не помогает. это цена ночной работы',
+    'будильник в 8. ноутбук ещё тёплый от вчерашней ночи. я холодная. руки не слушаются',
+    'полночи работала, полночи смотрела в потолок. итог: минус полдня',
+    'рассвет. экран слепит. уснула за ноутбуком. шея болит, спина болит, всё болит'
+  ];
+
+  // SPRINT 13 — Marina POV narrative for Tim automation (feels real, not system)
+  var AUTO_REACH_NARRATIVE = [
+    'открыла ноут · в inbox уже есть ответ от одного из фоновых холодок. AI-бот Тима отработал ночью',
+    'засыпала — папка «входящие» пустая. проснулась — три ответа. один живой, двое seen. не понимаю как это работает, но работает',
+    'бот тима написал за меня 20 холодок пока я спала. один из них ответил. я просто пью кофе и читаю. это странно',
+    'уведомление в 7:12 утра: «новый лид». AI сделал свою работу. я даже не знаю что ему написать в ответ — посмотрю',
+    'просыпаюсь в мире где мой холодный фарминг идёт без меня. не знаю куда это всё денется, но пока работает'
+  ];
+
+  var AUTO_BRIEF_NARRATIVE = [
+    'AI Тима провёл созвон за меня. отправил расшифровку: клиент адекватный, бюджет $200+, нужен лендинг. квалифицированный лид',
+    'открываю AI-трансcript: «клиент сказал, я хочу запустить за неделю, готов платить». квалифицирован. я даже не говорила с ним',
+    'бот закрыл первый контакт на брифе, сразу в qualified. я прочитала pipeline-notes и поняла что могу не звонить',
+    'AI-созвонщик: 23 минуты, 4 уточняющих, закрыл на следующий шаг. я за это время успела выпить кофе и посмотреть в окно',
+    'первый раз в жизни кто-то провёл созвон за меня. странное чувство благодарности и немного вины'
+  ];
+
+  var AUTO_OFFER_NARRATIVE = [
+    'AI отправил оффер и провёл торг. клиент согласился на upfront. я только что прочитала диалог — адекватный торг, не передавил',
+    'уведомление: «контракт подписан». AI сделал всё. upfront уже в банке. я проверяю три раза, не верю',
+    'бот отправил предложение, клиент согласился за 4 часа. я в этот момент гуляла. деньги пришли сами',
+    'торг AI: начал с $280, клиент упирался, AI сделал контр-оффер $240, согласие. я бы переборщила',
+    'вся воронка работает без меня. первый контакт → бриф → оффер → upfront. осталось только делать проект. это пугает и освобождает одновременно'
+  ];
+
   // ========== state ==========
 
   function defaultState() {
@@ -173,6 +247,8 @@
       plate_girl_count: 0,
       kirill_date_count: 0, // blocks date action after 3 uses
       kirill_blocked: false,
+      kirill_invite_active: false, // SPRINT 08 — pulses only when Kirill has active invite
+      kirill_invite_expires_day: 0,
       kirill_affection: 0,  // SPRINT 01 — love arc score
       love_ending_unlocked: false,
       beat_kirill_love_1: false,
@@ -181,12 +257,27 @@
       // Interaction counter (BLOCK M)
       player_interactions: 0,
       beat_tim_creator_fired: false,
-      // SPRINT 06 — Tim consultant automation tiers
+      // SPRINT 06/13 — Tim consultant automation tiers (3 tiers, work is not automated)
       beat_tim_consult_intro: false,
       auto_reach_out: false,       // tier 1 — $200
       auto_brief_lead: false,      // tier 2 — $300
-      auto_send_offer: false,      // tier 3 — $400
-      auto_work_project: false,    // tier 4 — $500
+      auto_send_offer: false,      // tier 3 — $400 (final tier)
+      // SPRINT 14 — guaranteed economy drain events
+      beat_drain_charger: false,   // day 3 — $60
+      beat_drain_phone: false,     // day 6 — $80
+      beat_drain_dentist: false,   // day 8 — $150
+      beat_drain_electric: false,  // day 11 — $100
+      // SPRINT 14 — khozyaika arc enhancement
+      beat_khozyaika_day3_noise: false,
+      beat_khozyaika_day5_electric: false,
+      beat_khozyaika_day7_damage: false,
+      beat_khozyaika_day9_chain: false,
+      beat_khozyaika_post12_flowers: false,
+      beat_khozyaika_post12_quote1: false,
+      beat_khozyaika_post12_quote2: false,
+      // SPRINT 14 — night work hangover
+      worked_night_last_day: 0,
+      _hangover_active: false,
       // beat flags (30-day arc)
       beat_lena_intro: false,
       beat_anna_offer: false,
@@ -214,9 +305,16 @@
       beat_mama17: false,
       beat_mama24: false,
       beat_denis3: false,
+      beat_denis6: false,
       beat_denis9: false,
       beat_denis15: false,
       beat_denis27: false,
+      // SPRINT 14.1 — explicit init for Denis reply-chip pending flags
+      _denis3_pending: false,
+      _denis6_pending: false,
+      _denis9_pending: false,
+      _denis15_pending: false,
+      _denis27_pending: false,
       // recurring spam intros (BLOCK A)
       beat_olya: false,
       beat_kirill: false,
@@ -231,6 +329,26 @@
       beat_svetka_day18: false,
       beat_svetka_day22: false,
       beat_svetka_day26: false,
+      // Sprint 07 late-game density beats
+      beat_khozyaika_d22: false,
+      beat_khozyaika_d27: false,
+      beat_olya_retry: false,
+      beat_olya_final: false,
+      beat_krypta_retry: false,
+      beat_krypta_final: false,
+      beat_pavel_d13: false,
+      beat_pavel_d17: false,
+      beat_pavel_d21: false,
+      beat_pavel_d25: false,
+      beat_mama_d20: false,
+      beat_denis_d22: false,
+      // Настя parallel arc
+      beat_nastya_d6: false,
+      beat_nastya_d11: false,
+      beat_nastya_d16: false,
+      beat_nastya_d20: false,
+      beat_nastya_d25: false,
+      beat_nastya_d30: false,
       // reactive
       reach_out_total: 0,
       reach_out_misses: 0,
@@ -256,6 +374,7 @@
         { id: 'vera',    name: 'Вера Николаевна',    avatar: 'В', unread: 0, visible: false, spam: true },
         { id: 'sosed',   name: 'сосед снизу',        avatar: 'С', unread: 0, visible: false, spam: true },
         { id: 'svetka',  name: 'Светка (подружка)',  avatar: '🎤', unread: 0, visible: false },
+        { id: 'nastya',  name: 'Настя (коллега)',    avatar: 'Н',  unread: 0, visible: false },
         // one-shot flavor spam (7)
         { id: 'lyuda',   name: 'Людочка (не та)',    avatar: 'Л', unread: 0, visible: false, spam: true },
         { id: 'ozon',    name: 'OZON курьер',        avatar: '📦', unread: 0, visible: false, spam: true },
@@ -269,7 +388,7 @@
       threads: {
         lena: [], anna: [], tim: [], bank: [],
         khozyaika: [], pavel: [], mama: [], denis: [],
-        olya: [], kirill: [], krypta: [], artur: [], vera: [], sosed: [], svetka: [],
+        olya: [], kirill: [], krypta: [], artur: [], vera: [], sosed: [], svetka: [], nastya: [],
         lyuda: [], ozon: [], taxi: [], student: [], katya: [], teshcha: [], marathon: [],
         scratch: []
       },
@@ -286,12 +405,17 @@
     OLD_KEYS.forEach(function (k) {
       try { localStorage.removeItem(k); } catch (e) {}
     });
+    // SPRINT 14.1 rev3 — forward-merge compatible saves across 2.x minor versions
+    // (Codex decision audit BLOCKER #2: don't reset player progress on every bump)
+    var COMPATIBLE_VERSIONS = ['2.2.0', '2.2.1', '2.2.2', '2.2.3', '2.1.1'];
     try {
       var raw = localStorage.getItem(STATE_KEY);
       var ver = localStorage.getItem(VERSION_KEY);
-      if (raw && ver === VERSION) {
+      if (raw && (ver === VERSION || COMPATIBLE_VERSIONS.indexOf(ver) !== -1)) {
         var parsed = JSON.parse(raw);
         var d = defaultState();
+        // Stamp current version onto migrated save so future loads skip the compat check
+        parsed.version = VERSION;
         // Top-level merge
         for (var k in d) {
           if (!(k in parsed)) parsed[k] = d[k];
@@ -381,24 +505,33 @@
     if (STATE.lamp_on) {
       // Воронка: искать → созвон → оффер → работать → ночная работа
       actions.push({
-        id: 'reach_out', label: 'искать клиентов', cost: '1ч · −5⚡',
-        disabled: STATE.hours < COST.reach_out.h || STATE.energy < COST.reach_out.e,
-        reason: STATE.hours < COST.reach_out.h ? 'нет часов' : 'нет энергии',
-        primary: true
+        id: 'reach_out',
+        label: (STATE.auto_reach_out ? '🤖 ' : '') + 'искать клиентов',
+        cost: STATE.auto_reach_out ? 'AI делает' : '1ч · −5⚡',
+        auto: STATE.auto_reach_out,
+        disabled: STATE.auto_reach_out || STATE.hours < COST.reach_out.h || STATE.energy < COST.reach_out.e,
+        reason: STATE.auto_reach_out ? 'AI автоматизирован' : (STATE.hours < COST.reach_out.h ? 'нет часов' : 'нет энергии'),
+        primary: !STATE.auto_reach_out
       });
       actions.push({
-        id: 'brief_lead', label: 'созвон с лидом', cost: '1ч · −3⚡',
-        badge: STATE.leads > 0 ? STATE.leads : null,
+        id: 'brief_lead',
+        label: (STATE.auto_brief_lead ? '🤖 ' : '') + 'созвон с лидом',
+        cost: STATE.auto_brief_lead ? 'AI делает' : '1ч · −3⚡',
+        auto: STATE.auto_brief_lead,
+        badge: !STATE.auto_brief_lead && STATE.leads > 0 ? STATE.leads : null,
         badgeHot: STATE.leads > 0,
-        disabled: STATE.leads < 1 || STATE.hours < COST.brief_lead.h || STATE.energy < COST.brief_lead.e,
-        reason: STATE.leads < 1 ? 'нет лидов' : (STATE.hours < COST.brief_lead.h ? 'нет часов' : 'нет энергии')
+        disabled: STATE.auto_brief_lead || STATE.leads < 1 || STATE.hours < COST.brief_lead.h || STATE.energy < COST.brief_lead.e,
+        reason: STATE.auto_brief_lead ? 'AI автоматизирован' : (STATE.leads < 1 ? 'нет лидов' : (STATE.hours < COST.brief_lead.h ? 'нет часов' : 'нет энергии'))
       });
       actions.push({
-        id: 'send_offer', label: 'отправить оффер', cost: '1ч',
-        badge: STATE.qualified_leads > 0 ? STATE.qualified_leads : null,
+        id: 'send_offer',
+        label: (STATE.auto_send_offer ? '🤖 ' : '') + 'отправить оффер',
+        cost: STATE.auto_send_offer ? 'AI делает' : '1ч',
+        auto: STATE.auto_send_offer,
+        badge: !STATE.auto_send_offer && STATE.qualified_leads > 0 ? STATE.qualified_leads : null,
         badgeHot: STATE.qualified_leads > 0,
-        disabled: STATE.qualified_leads < 1 || STATE.hours < COST.send_offer.h || STATE.bank_locked,
-        reason: STATE.bank_locked ? 'счёт заблокирован' : (STATE.qualified_leads < 1 ? 'нет брифов' : 'нет часов')
+        disabled: STATE.auto_send_offer || STATE.qualified_leads < 1 || STATE.hours < COST.send_offer.h || STATE.bank_locked,
+        reason: STATE.auto_send_offer ? 'AI автоматизирован' : (STATE.bank_locked ? 'счёт заблокирован' : (STATE.qualified_leads < 1 ? 'нет брифов' : 'нет часов'))
       });
       actions.push({
         id: 'work_on_project', label: 'делать работу', cost: '2ч · −5⚡',
@@ -409,7 +542,8 @@
       actions.push({
         id: 'work_night', label: '🌙 ночная работа', cost: '−15⚡ · −15💚',
         disabled: STATE.active_projects.length === 0 || STATE.day < 3 || STATE.energy < COST.work_night.e,
-        reason: STATE.day < 3 ? 'доступно с дня 3' : (STATE.active_projects.length === 0 ? 'нет проектов' : 'мало энергии')
+        reason: STATE.day < 3 ? 'доступно с дня 3' : (STATE.active_projects.length === 0 ? 'нет проектов' : 'мало энергии'),
+        hideOnMobile: STATE.active_projects.length === 0 || STATE.day < 3
       });
       // Еда + отдых + шопинг
       actions.push({
@@ -434,21 +568,33 @@
       actions.push({
         id: 'shopping', label: '🛍 шопинг', cost: '2ч · −$80',
         disabled: STATE.day < 5 || STATE.cash < COST.shopping.c || STATE.hours < COST.shopping.h || STATE.bank_locked,
-        reason: STATE.day < 5 ? 'с дня 5' : (STATE.bank_locked ? 'счёт заблокирован' : 'не хватает ресурсов')
+        reason: STATE.day < 5 ? 'с дня 5' : (STATE.bank_locked ? 'счёт заблокирован' : 'не хватает ресурсов'),
+        hideOnMobile: STATE.day < 5 || STATE.cash < COST.shopping.c || STATE.bank_locked
       });
       // Social actions — только если анлокнуты
       if (STATE.kirill_unlocked && !STATE.kirill_blocked) {
+        var kirillInviteActive = !!STATE.kirill_invite_active;
         actions.push({
-          id: 'date_kirill', label: '💔 свидание (Кирилл)', cost: '3ч · −10⚡',
-          disabled: STATE.hours < COST.date_kirill.h || (STATE.kirill_date_count >= 4 && !STATE.bank_locked),
-          reason: 'не хватает часов'
+          id: 'date_kirill',
+          label: '💔 свидание (Кирилл)',
+          cost: '3ч · −10⚡',
+          badge: kirillInviteActive ? '!' : null,
+          badgePulse: kirillInviteActive,
+          disabled: !kirillInviteActive || STATE.hours < COST.date_kirill.h || STATE.energy < COST.date_kirill.e || (STATE.kirill_date_count >= 4 && !STATE.bank_locked),
+          reason: !kirillInviteActive ? 'Кирилл сейчас не зовёт' : (STATE.energy < COST.date_kirill.e ? 'нет энергии' : 'не хватает часов'),
+          hideOnMobile: !kirillInviteActive
         });
       }
       if (STATE.beat_denis3 || STATE.beat_denis6 || STATE.beat_denis9 || STATE.beat_denis15) {
+        // Denis actions only via reply chips in chat (per-event pricing)
+        var hasDenisPending = STATE._denis3_pending || STATE._denis6_pending || STATE._denis9_pending || STATE._denis15_pending || STATE._denis27_pending;
         actions.push({
-          id: 'hangout_denis', label: '🎉 с Денисом', cost: '4ч · −$150',
-          disabled: STATE.cash < COST.hangout_denis.c || STATE.hours < COST.hangout_denis.h || STATE.bank_locked,
-          reason: STATE.bank_locked ? 'счёт заблокирован' : 'не хватает ресурсов'
+          id: 'hangout_denis', label: '🎉 с Денисом', cost: hasDenisPending ? 'ответь в чат' : 'ждёт приглашения',
+          badge: hasDenisPending ? '!' : null,
+          badgePulse: hasDenisPending,
+          disabled: !hasDenisPending,
+          reason: 'ответь на приглашение Дениса в чате',
+          hideOnMobile: !hasDenisPending
         });
       }
       actions.push({
@@ -466,8 +612,15 @@
         $btn.addClass('primary');
         primarySet = true;
       }
+      if (a.auto) {
+        $btn.addClass('auto-ai');
+      }
       if (a.id === 'end_day' && STATE.hours <= 2 && STATE.lamp_on) {
         $btn.addClass('pulse');
+      }
+      // SPRINT 14 — hide irrelevant disabled buttons on mobile
+      if (a.hideOnMobile && a.disabled) {
+        $btn.addClass('mobile-hide');
       }
       if (a.cost) $btn.append($('<span class="dock-cost">').text(' · ' + a.cost));
       if (a.badge !== null && a.badge !== undefined) {
@@ -492,10 +645,114 @@
     renderHud();
   }
 
+  // SPRINT 12 — Marina's morning inner monologue (visible crisis feedback)
+  function postMorningMonologue() {
+    if (STATE.day < 2) return; // skip day 1
+    // SPRINT 14 — hangover takes priority
+    if (STATE._hangover_active) {
+      postMessage('scratch', {
+        kind: 'outgoing',
+        photo: 'img/events/hangover_desk.webp',
+        photoAlt: 'утро после ночной работы',
+        text: pick(HANGOVER_MORNINGS)
+      });
+      postSystem('scratch', '☕ после ночной работы · энергия не восстановилась');
+      return;
+    }
+    var h = STATE.hunger, e = STATE.energy, m = STATE.comfort;
+    // Pick the worst resource and post inner-monologue for it
+    if (h != null && h < 30) {
+      // SPRINT 14.3 — empty fridge photo when critically hungry
+      postMessage('scratch', {
+        kind: 'outgoing',
+        photo: h < 15 ? 'img/events/marina_hungry.webp' : undefined,
+        photoAlt: 'пустой холодильник',
+        text: pick(HUNGRY_MORNINGS)
+      });
+      return;
+    }
+    if (m != null && m < 25) {
+      postMessage('scratch', { kind: 'outgoing', text: pick(SAD_MORNINGS) });
+      return;
+    }
+    if (e < 30) {
+      postMessage('scratch', { kind: 'outgoing', text: pick(TIRED_MORNINGS) });
+      return;
+    }
+    // Fine morning — only 25% chance (not every day)
+    if (Math.random() < 0.25) {
+      postMessage('scratch', { kind: 'outgoing', text: pick(FINE_MORNINGS) });
+    }
+  }
+
+  // SPRINT 12 — Dynamic brand subtitle based on Marina's state
+  function renderBrandStatus() {
+    var $sub = $('.brand-subtitle');
+    if ($sub.length === 0) return;
+    var h = STATE.hunger || 100;
+    var e = STATE.energy || 100;
+    var m = STATE.comfort || 60;
+    var status = 'теледрам v' + VERSION;
+    if (STATE.bank_locked) status = '🔒 счёт заблокирован';
+    else if (h < 20) status = '🍔 очень голодна';
+    else if (e < 20) status = '⚡ на пределе';
+    else if (m < 20) status = '💔 грустит';
+    else if (h < 35 || e < 35 || m < 30) status = '😮‍💨 устала';
+    $sub.text(status);
+
+    // Avatar grayscale when comfort low
+    var $avatar = $('.brand-circle img');
+    if ($avatar.length) {
+      if (m < 30) $avatar.css('filter', 'grayscale(0.7) brightness(0.85)');
+      else $avatar.css('filter', '');
+    }
+  }
+
+  // SPRINT 12 — Crisis banner top of screen (persistent warning)
+  function renderCrisisBanner() {
+    var $banner = $('#crisis-banner');
+    if ($banner.length === 0) return;
+    var h = STATE.hunger, e = STATE.energy, m = STATE.comfort, c = STATE.cash;
+    var msg = null, cls = '';
+
+    if (STATE.bank_locked) {
+      var daysLeft = Math.max(0, (STATE.bank_locked_until || STATE.day) - STATE.day);
+      msg = '🔒 СЧЁТ ЗАБЛОКИРОВАН ПО 115-ФЗ · ещё ' + daysLeft + ' дн.';
+      cls = 'crit';
+    } else if (h != null && h < 15) {
+      msg = '🍔 МАРИНА ГОЛОДАЕТ · энергия падает быстро · поешь';
+      cls = 'crit';
+    } else if (e < 15) {
+      msg = '⚡ МАРИНА НА ПРЕДЕЛЕ · перерыв срочно';
+      cls = 'crit';
+    } else if (c < -500) {
+      msg = '💰 БАЛАНС КРИТИЧЕСКИЙ · −$' + Math.abs(c) + ' · сдай проект или теряешь квартиру';
+      cls = 'crit';
+    } else if (m != null && m < 15) {
+      msg = '💔 КОМФОРТ ОБНУЛИЛСЯ · ты сгораешь · шопинг/еда/друзья';
+      cls = 'crit';
+    } else if (h != null && h < 30) {
+      msg = '🍔 голодно · хочется настоящей еды';
+      cls = 'warn';
+    } else if (e < 30) {
+      msg = '⚡ устала · пора отдохнуть';
+      cls = 'warn';
+    }
+
+    if (msg) {
+      $banner.text(msg).attr('class', 'crisis-banner ' + cls).show();
+    } else {
+      $banner.hide();
+    }
+  }
+
   // ===== Top resource HUD (BLOCK C.1) =====
   function renderHud() {
+    renderBrandStatus();
+    renderCrisisBanner();
     var $hud = $('#resource-hud');
-    if ($hud.length === 0) return;
+    var $hudList = $('#resource-hud-list'); // mobile list view
+    if ($hud.length === 0 && $hudList.length === 0) return;
 
     function colorClass(val) {
       if (val >= 60) return 'ok';
@@ -520,7 +777,9 @@
       parts.push('<div class="r-pill r-locked"><span class="r-icon">🔒</span><span class="r-val">115-ФЗ</span><span class="r-max">· ' + daysLeft + 'д</span></div>');
     }
 
-    $hud.html(parts.join(''));
+    var html = parts.join('');
+    if ($hud.length) $hud.html(html);
+    if ($hudList.length) $hudList.html(html);
   }
 
   // ========== messenger rendering ==========
@@ -661,30 +920,7 @@
       });
       return;
     }
-    // Tim tier 4 — auto_work_project
-    if (contactId === 'tim' && STATE._tim_tier4_pending && !STATE.auto_work_project) {
-      Bubbles.renderReplyChips([
-        { id: 'buy', label: 'купить AI-копирайтера ($500)' },
-        { id: 'later', label: 'нет' }
-      ], function (opt) {
-        STATE._tim_tier4_pending = false;
-        Bubbles.clearChipsArea();
-        bumpInteraction();
-        if (opt.id === 'buy' && STATE.cash >= 500 && !STATE.bank_locked) {
-          STATE.cash -= 500;
-          STATE.auto_work_project = true;
-          postBank(-500, 'Тим · AI копирайтер');
-          postOutgoing('tim', 'беру.');
-          setTimeout(function () {
-            postIncoming('tim', 'готово. AI пишет первый черновик, ты добиваешь.', 'Тим');
-          }, 900);
-        } else {
-          postOutgoing('tim', opt.id === 'buy' ? 'не хватает денег' : 'нет.');
-        }
-        save(); renderDock();
-      });
-      return;
-    }
+    // (tier 4 removed — work_on_project stays manual by design)
     // Khozyaika 1 — счётчики воды
     if (contactId === 'khozyaika' && STATE._khozyaika1_pending) {
       Bubbles.renderReplyChips([
@@ -765,6 +1001,52 @@
       });
       return;
     }
+    // SPRINT 14 — Khozyaika day 5 electric meter
+    if (contactId === 'khozyaika' && STATE._khozyaika_electric_pending) {
+      Bubbles.renderReplyChips([
+        { id: 'send', label: 'отправить фото (−1h)' },
+        { id: 'later', label: 'потом отправлю (−5 комфорт)' }
+      ], function (opt) {
+        STATE._khozyaika_electric_pending = false;
+        Bubbles.clearChipsArea();
+        bumpInteraction();
+        if (opt.id === 'send') {
+          postOutgoing('khozyaika', 'отправила фото счётчика. розетка нормальная.');
+          STATE.hours = Math.max(0, STATE.hours - 1);
+        } else {
+          postOutgoing('khozyaika', 'Наталья Валерьевна, отправлю позже.');
+          STATE.comfort = Math.max(0, STATE.comfort - 5);
+        }
+        save(); renderDock();
+      });
+      return;
+    }
+    // SPRINT 14 — Khozyaika day 9 chain letter
+    if (contactId === 'khozyaika' && STATE._khozyaika_chain_pending) {
+      Bubbles.renderReplyChips([
+        { id: 'forward', label: 'переслать 5 людям (−1h)' },
+        { id: 'refuse', label: 'не буду (−5 комфорт)' }
+      ], function (opt) {
+        STATE._khozyaika_chain_pending = false;
+        Bubbles.clearChipsArea();
+        bumpInteraction();
+        if (opt.id === 'forward') {
+          postOutgoing('khozyaika', 'хорошо, переслала.');
+          STATE.hours = Math.max(0, STATE.hours - 1);
+          setTimeout(function () {
+            postIncoming('khozyaika', 'СПАСИБО Марина! Карма дома восстановлена! 🙏✨', 'Наталья В.');
+          }, 800);
+        } else {
+          postOutgoing('khozyaika', 'Наталья Валерьевна, я не верю в это.');
+          STATE.comfort = Math.max(0, STATE.comfort - 5);
+          setTimeout(function () {
+            postIncoming('khozyaika', 'Ну как хотите. Но если что случится — я предупреждала.', 'Наталья В.');
+          }, 800);
+        }
+        save(); renderDock();
+      });
+      return;
+    }
     // Pavel loan
     if (contactId === 'pavel' && STATE._pavel_pending) {
       Bubbles.renderReplyChips([
@@ -835,24 +1117,55 @@
       });
       return;
     }
-    // Denis party invitations (any day — invitations use generic pending)
+    // Denis party invitations (any day — SPRINT 14: per-event variable pricing)
+    // SPRINT 14.1 rev3 — chip enforces bank_locked, cash, hours guards (was bypassed after
+    // actHangoutDenis() removal). Codex decision audit BLOCKER #1.
+    var DENIS_COSTS = { 3: 250, 6: 200, 9: 300, 15: 350, 27: 300 };
     [3, 6, 9, 15, 27].forEach(function (d) {
       var key = '_denis' + d + '_pending';
       if (contactId === 'denis' && STATE[key]) {
+        var dCost = DENIS_COSTS[d] || 250;
+        var canAfford = !STATE.bank_locked && STATE.cash >= dCost && STATE.hours >= 2;
+        var denyReason = STATE.bank_locked ? 'счёт заблокирован' :
+                         (STATE.cash < dCost ? 'не хватает $' + (dCost - STATE.cash) :
+                         (STATE.hours < 2 ? 'нет 2 часов' : null));
         Bubbles.renderReplyChips([
-          { id: 'go', label: 'поехать (−$150, +60⚡, −2h дня)' },
+          {
+            id: 'go',
+            label: 'поехать (−$' + dCost + ', +60⚡, −2h дня)' + (canAfford ? '' : ' · ' + denyReason),
+            disabled: !canAfford
+          },
           { id: 'skip', label: 'не сейчас' }
         ], function (opt) {
+          // SPRINT 14.1 rev4 — re-evaluate guards against CURRENT STATE (not stale closure).
+          // Codex caught bypass: player opens chat while affordable, spends money
+          // elsewhere, returns and clicks "go" — render-time canAfford was true.
+          if (opt.id === 'go') {
+            var liveBankLocked = STATE.bank_locked;
+            var liveCash = STATE.cash;
+            var liveHours = STATE.hours;
+            if (liveBankLocked || liveCash < dCost || liveHours < 2) {
+              var reason = liveBankLocked ? 'счёт заблокирован' :
+                           (liveCash < dCost ? 'не хватает $' + (dCost - liveCash) : 'нет 2 часов');
+              postOutgoing('denis', 'слушай, не сейчас. не могу — ' + reason + '.');
+              // Do NOT clear pending — let player come back when ready.
+              // Re-render chips so UI reflects current resource state.
+              Bubbles.clearChipsArea();
+              renderThreadContextActions('denis');
+              return;
+            }
+          }
           STATE[key] = false;
           Bubbles.clearChipsArea();
           bumpInteraction();
           if (opt.id === 'go') {
             postOutgoing('denis', 'ладно, поехали. работа подождёт.');
-            STATE.cash -= 150;
+            STATE.cash -= dCost;
             STATE.energy = Math.min(100, STATE.energy + 60);
             STATE.hours = Math.max(0, STATE.hours - 2);
-            postBank(-150, 'с Денисом');
-            postMessage('scratch', { kind: 'system', text: '−$150 · +60⚡ · −2h · день ожил' });
+            postBank(-dCost, 'с Денисом');
+            postMessage('scratch', { kind: 'outgoing', text: pick(HANGOUT_DENIS_TEXT) });
+            postMessage('scratch', { kind: 'system', text: '−$' + dCost + ' · +60⚡ · −2h · день ожил' });
           } else {
             postOutgoing('denis', 'не сегодня. работа.');
             postMessage('scratch', { kind: 'system', text: 'Денису отказала' });
@@ -908,7 +1221,10 @@
           postOutgoing('kirill', 'хорошо, давай встретимся. не обещаю ничего серьёзного.');
           STATE.kirill_unlocked = true;
           STATE.kirill_affection = (STATE.kirill_affection || 0) + 3;
-          postMessage('scratch', { kind: 'system', text: 'Кирилл разблокировал свидания' });
+          // Activate date invitation window (expires in 2 days)
+          STATE.kirill_invite_active = true;
+          STATE.kirill_invite_expires_day = (STATE.day || 1) + 2;
+          postMessage('scratch', { kind: 'system', text: 'Кирилл разблокировал свидания · ⏳ окно 2 дня' });
         } else {
           postOutgoing('kirill', 'извини, ты не мой типаж.');
           STATE.kirill_blocked = true;
@@ -1152,6 +1468,7 @@
     // Default fields
     if (!msg.time) msg.time = Bubbles.formatTimestamp(STATE.day, STATE.hours);
     if (!msg.kind) msg.kind = 'incoming';
+    msg._received_at = Date.now(); // for contact sort by last message time
     Bubbles.appendToThreadHistory(STATE, threadId, msg);
     // If this thread is currently open, render live
     if (STATE.current_chat === threadId) {
@@ -1312,7 +1629,7 @@
       triggerLenaIntro();
       renderDock();
     }, 500);
-    // Day 1 Khozyaika rent reminder — arrives 2.5s after lamp click
+    // Day 1 Khozyaika rent reminder only — rest of her beats spread across days
     setTimeout(function () {
       beatKhozyaikaDay1Rent();
     }, 2500);
@@ -1473,11 +1790,20 @@
 
     runAction(function () {
       var p = STATE.active_projects[0];
-      p.progress = Math.min(100, (p.progress || 0) + 34);
+      // SPRINT 14 — hunger + hangover affect work progress
+      var workProgress = 34;
+      if (STATE.hunger < 30) workProgress = 15;
+      else if (STATE.hunger < 50) workProgress = 25;
+      if (STATE._hangover_active) workProgress = Math.floor(workProgress * 0.75);
+      p.progress = Math.min(100, (p.progress || 0) + workProgress);
       p.work_units_done = (p.work_units_done || 0) + 1; // daytime = 1 unit
-      postOutgoing('scratch', pick(WORK_TEXT));
+      postOutgoing('scratch', STATE.hunger < 50 ? pick(WORK_TEXT_HUNGRY) : pick(WORK_TEXT));
       setTimeout(function () {
-        postSystem('scratch', 'проект #' + p.id + ' · прогресс ' + Math.floor(p.progress) + '%');
+        var extra = '';
+        if (STATE.hunger < 30) extra = ' · 🍔 голод снижает прогресс';
+        else if (STATE.hunger < 50) extra = ' · 🍔 голодно';
+        if (STATE._hangover_active) extra += ' · ☕ похмелье';
+        postSystem('scratch', 'проект #' + p.id + ' · прогресс ' + Math.floor(p.progress) + '%' + extra);
         if (p.work_units_done >= (p.work_units_total || 3)) {
           // Delivered — money particle flies to cash pill
           STATE.active_projects.shift();
@@ -1578,6 +1904,8 @@
     STATE.hunger = Math.min(100, STATE.hunger + COST.date_kirill.f);
     STATE.comfort = Math.min(100, STATE.comfort + COST.date_kirill.m);
     STATE.kirill_date_count += 1;
+    // Clear active invite — Kirill gets quiet until next ping
+    STATE.kirill_invite_active = false;
     if (STATE.bank_locked) {
       STATE.plate_girl_count = (STATE.plate_girl_count || 0) + 1;
       STATE.kirill_affection = Math.max(0, (STATE.kirill_affection || 0) - 5);
@@ -1593,26 +1921,11 @@
     });
   }
 
-  function actHangoutDenis() {
-    if (STATE.bank_locked) return;
-    if (STATE.cash < COST.hangout_denis.c) return;
-    if (STATE.hours < COST.hangout_denis.h) return;
-    STATE.hours -= COST.hangout_denis.h;
-    STATE.cash -= COST.hangout_denis.c;
-    STATE.hunger = Math.min(100, STATE.hunger + COST.hangout_denis.f);
-    STATE.comfort = Math.min(100, STATE.comfort + COST.hangout_denis.m);
-    STATE.energy = Math.min(100, STATE.energy + COST.hangout_denis.ePlus);
-
-    runAction(function () {
-      postOutgoing('scratch', pick(HANGOUT_DENIS_TEXT));
-      setTimeout(function () {
-        postSystem('scratch', '+' + COST.hangout_denis.m + ' комфорт · +' + COST.hangout_denis.ePlus + '⚡ · −$' + COST.hangout_denis.c);
-        postBank(-COST.hangout_denis.c, 'с Денисом');
-      }, 400);
-    });
-  }
+  // SPRINT 14.1 — actHangoutDenis() removed. Denis interactions go via chat reply chips
+  // with per-event pricing (DENIS_COSTS map at line ~1093). Dock button only opens chat.
 
   // BLOCK F — night work (extra time beyond 8h day, burns energy + comfort)
+  // SPRINT 14 — tracks hangover for next morning
   function actWorkNight() {
     if (STATE.active_projects.length === 0) return;
     if (STATE.day < 3) return;
@@ -1620,14 +1933,19 @@
     // No hours check — night work happens AFTER the day's 8 hours
     STATE.energy = Math.max(0, STATE.energy - COST.work_night.e);
     STATE.comfort = Math.max(0, STATE.comfort + COST.work_night.m); // .m is negative
+    STATE.worked_night_last_day = STATE.day; // SPRINT 14 — triggers hangover
 
     runAction(function () {
       var p = STATE.active_projects[0];
-      p.progress = Math.min(100, (p.progress || 0) + 50);
+      // SPRINT 14 — hunger affects night work too
+      var nightProgress = 50;
+      if (STATE.hunger < 30) nightProgress = 22;
+      else if (STATE.hunger < 50) nightProgress = 37;
+      p.progress = Math.min(100, (p.progress || 0) + nightProgress);
       p.work_units_done = (p.work_units_done || 0) + 1.5; // night = 1.5 units
       postOutgoing('scratch', pick(WORK_NIGHT_TEXT));
       setTimeout(function () {
-        postSystem('scratch', 'проект #' + p.id + ' · прогресс ' + Math.floor(p.progress) + '% · −15⚡ ночной режим');
+        postSystem('scratch', 'проект #' + p.id + ' · прогресс ' + Math.floor(p.progress) + '% · −15⚡ ночной режим · завтра будет тяжело');
         if (p.work_units_done >= (p.work_units_total || 3)) {
           // Delivered
           STATE.active_projects.shift();
@@ -1670,7 +1988,18 @@
       try {
         STATE.day += 1;
         STATE.hours = HOURS_PER_DAY;
-        STATE.energy = Math.min(100, STATE.energy + 20);
+        // SPRINT 14 — overnight energy recovery depends on hunger + hangover
+        var overnightRecovery = 20;
+        if (STATE.hunger < 30) overnightRecovery = 5;
+        else if (STATE.hunger < 50) overnightRecovery = 12;
+        // Night work hangover — extra penalty
+        if (STATE.worked_night_last_day === prevDay) {
+          overnightRecovery = Math.max(0, overnightRecovery - 10);
+          STATE._hangover_active = true;
+        } else {
+          STATE._hangover_active = false;
+        }
+        STATE.energy = Math.min(100, STATE.energy + overnightRecovery);
         STATE.coffee_stacks = Math.max(0, STATE.coffee_stacks - 1);
 
         // Day 12 → 13 transition → finale check
@@ -1692,7 +2021,13 @@
         }
 
         try { processPassive(STATE.day); } catch (e) { console.error('passive error', e); }
+        // SPRINT 12 — Marina's morning inner monologue based on worst resource
+        try { postMorningMonologue(); } catch (e) {}
         try { fireDayBeats(STATE.day); } catch (e) { console.error('beats error', e); }
+        // Expire Kirill invite if window closed
+        if (STATE.kirill_invite_active && STATE.kirill_invite_expires_day && STATE.day > STATE.kirill_invite_expires_day) {
+          STATE.kirill_invite_active = false;
+        }
         // Check mid-month hard-fail conditions (hunger starvation / comfort breakdown / cash crash)
         try { checkEndings(false); } catch (e) {}
         // SPRINT 02 — Finale track kicks in on last 2 days
@@ -1783,8 +2118,7 @@
   var TIM_TIERS = [
     { id: 'auto_reach_out',   label: 'Автофарминг холодных лидов', price: 200 },
     { id: 'auto_brief_lead',  label: 'Авто-созвоны с лидами',      price: 300 },
-    { id: 'auto_send_offer',  label: 'Авто-оффер и торг',          price: 400 },
-    { id: 'auto_work_project',label: 'AI-копирайтер для проектов', price: 500 }
+    { id: 'auto_send_offer',  label: 'Авто-оффер и торг',          price: 400 }
   ];
 
   function beatTimConsultIntro() {
@@ -1839,16 +2173,7 @@
     STATE._tim_tier3_pending = true;
   }
 
-  function beatTimTier4Offer() {
-    if (STATE.beat_tim_tier4_offer) return;
-    STATE.beat_tim_tier4_offer = true;
-    postMessage('tim', {
-      kind: 'incoming',
-      senderName: 'Тим',
-      text: 'последний уровень: AI-копирайтер делает первый черновик проектов. $500. +0.5 work unit в день по текущему проекту.'
-    });
-    STATE._tim_tier4_pending = true;
-  }
+  // (tier 4 removed — see SPRINT 13)
 
   // Day 28 — 4th wall break (moved from interaction-based to late-game beat)
   function beatTimCreator() {
@@ -1936,6 +2261,8 @@
     postMessage('khozyaika', {
       kind: 'incoming',
       senderName: 'Наталья Валерьевна',
+      photo: 'img/events/khozyaika_meters.webp',
+      photoAlt: 'счётчики воды',
       text: 'Марина, добрый день! Не забудьте передать показания счётчиков горячей и холодной воды до 10 числа. ВАЖНО: обязательно с фотографией сертифицированного образца. Иначе штраф $100. Наталья В.'
     });
     postMessage('scratch', { kind: 'system', text: 'хозяйка требует счётчики · открой чат' });
@@ -1962,7 +2289,7 @@
     postMessage('khozyaika', {
       kind: 'incoming',
       senderName: 'Наталья Валерьевна',
-      photo: 'img/events/cat_window.webp',
+      photo: 'img/events/khozyaika_cat.webp',
       photoAlt: 'кошка Мурка',
       text: 'SOS МАРИНА! Кошка Мурка сбежала из квартиры на восьмом этаже. Помогите расклеить объявления по району, вы же дома работаете? У вас время есть. Срочно пожалуйста.'
     });
@@ -1977,6 +2304,8 @@
     postMessage('khozyaika', {
       kind: 'incoming',
       senderName: 'Наталья Валерьевна',
+      photo: 'img/events/khozyaika_tarot.webp',
+      photoAlt: 'карты таро',
       text: 'Марина, читала ваш гороскоп на месяц. Скорпионы в этом месяце в огне. Деньги НЕ давайте Весам (особенно Весам в очках). Это важно для кармы дома, я переживаю как за родную.'
     });
     STATE._khozyaika4_pending = true;
@@ -2048,7 +2377,7 @@
     if (STATE.beat_pavel_day5) return;
     STATE.beat_pavel_day5 = true;
     var c = findContact('pavel'); if (c) c.visible = true;
-    postMessage('pavel', { kind: 'incoming', senderName: 'Павел', text: 'я тут вспомнил, как мы с тобой в Питере сидели на Мойке. помнишь?' });
+    postMessage('pavel', { kind: 'incoming', senderName: 'Павел', photo: 'img/events/pavel_roof.webp', photoAlt: 'крыша', text: 'я тут вспомнил, как мы с тобой в Питере сидели на Мойке. помнишь?' });
     setTimeout(function () {
       postMessage('pavel', { kind: 'incoming', senderName: 'Павел', text: 'тебе было 23, мне 27. я был дурак и не понимал ничего. прости если что.' });
     }, 1200);
@@ -2059,6 +2388,224 @@
     STATE.beat_pavel_day7 = true;
     var c = findContact('pavel'); if (c) c.visible = true;
     postMessage('pavel', { kind: 'incoming', senderName: 'Павел', text: 'слушай, ты сейчас одна? в смысле по жизни.' });
+  }
+
+  // ========== SPRINT 07 — Late-game density beats ==========
+
+  function beatKhozyaikaD22() {
+    if (STATE.beat_khozyaika_d22) return;
+    STATE.beat_khozyaika_d22 = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    postMessage('khozyaika', {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      text: 'Марина, я вчера видела сон будто у нас в подъезде появился домовой в форме кошки. Мурка теперь на подоконнике смотрит в одну точку третий день. Вы не против если я загляну освятить квартиру батюшкой?'
+    });
+  }
+
+  function beatKhozyaikaD27() {
+    if (STATE.beat_khozyaika_d27) return;
+    STATE.beat_khozyaika_d27 = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    postMessage('khozyaika', {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      text: 'Марина, на следующей неделе полнолуние в Раке. В это время комоды особенно уязвимы. Пожалуйста, не ставьте на него горячие чашки и не включайте китайских мантр рядом. И вообще лучше выйти из квартиры между 23:00 и 01:00.'
+    });
+  }
+
+  function beatOlyaRetry() {
+    if (STATE.beat_olya_retry) return;
+    STATE.beat_olya_retry = true;
+    var c = findContact('olya'); if (c) c.visible = true;
+    postMessage('olya', {
+      kind: 'incoming',
+      senderName: 'Оля Петрова',
+      photo: 'img/events/olya_product.webp',
+      photoAlt: 'продукт клуба',
+      text: 'Мариночка, как ты? Я тут обновление по нашему клубу — мы запускаем НОВЫЙ уровень. Всего $400, но ты получаешь в три раза больше активаций. Подумай, я верю в тебя!'
+    });
+  }
+
+  function beatOlyaFinal() {
+    if (STATE.beat_olya_final) return;
+    STATE.beat_olya_final = true;
+    var c = findContact('olya'); if (c) c.visible = true;
+    postMessage('olya', {
+      kind: 'incoming',
+      senderName: 'Оля Петрова',
+      text: 'Марина, я понимаю что ты сомневаешься. Но вот скриншот моего дохода за месяц: $3200 чистыми. И это не предел. Последнее предложение: $150, заходишь бесплатным уровнем и начинаешь зарабатывать.'
+    });
+  }
+
+  function beatKryptaRetry() {
+    if (STATE.beat_krypta_retry) return;
+    STATE.beat_krypta_retry = true;
+    var c = findContact('krypta'); if (c) c.visible = true;
+    postMessage('krypta', {
+      kind: 'incoming',
+      senderName: 'БРАТ крипта',
+      photo: 'img/events/krypta_wallet.webp',
+      photoAlt: 'крипто-кошелёк',
+      text: 'БРАТ алё ты жива? смотри SOLANA х3 за неделю я говорил! у меня есть ещё 1 слот. $50 минимум, на следующей неделе $500. не упусти'
+    });
+  }
+
+  function beatKryptaFinal() {
+    if (STATE.beat_krypta_final) return;
+    STATE.beat_krypta_final = true;
+    var c = findContact('krypta'); if (c) c.visible = true;
+    postMessage('krypta', {
+      kind: 'incoming',
+      senderName: 'БРАТ крипта',
+      text: 'сестра, скажу честно. у меня не было $100. они пошли на оплату хостинга для моего блога. но завтра реально точно ракета. прости брат. больше не будет. $30?'
+    });
+  }
+
+  function beatPavelD13() {
+    if (STATE.beat_pavel_d13) return;
+    STATE.beat_pavel_d13 = true;
+    var c = findContact('pavel'); if (c) c.visible = true;
+    postMessage('pavel', {
+      kind: 'incoming',
+      senderName: 'Павел',
+      photo: 'img/events/pavel_bridge.webp',
+      photoAlt: 'мост ночью',
+      text: 'марина я вчера был в твоём доме. просто проходил. вспомнил крышу куда мы поднимались в мае 2022. помнишь?'
+    });
+  }
+
+  function beatPavelD17() {
+    if (STATE.beat_pavel_d17) return;
+    STATE.beat_pavel_d17 = true;
+    var c = findContact('pavel'); if (c) c.visible = true;
+    postMessage('pavel', {
+      kind: 'incoming',
+      senderName: 'Павел',
+      text: 'слушай. а если я серьёзно. давай встретимся на чашку кофе. без возврата денег, без истории. как старые знакомые.'
+    });
+  }
+
+  function beatPavelD21() {
+    if (STATE.beat_pavel_d21) return;
+    STATE.beat_pavel_d21 = true;
+    var c = findContact('pavel'); if (c) c.visible = true;
+    postMessage('pavel', {
+      kind: 'incoming',
+      senderName: 'Павел',
+      text: 'марин, слышал у тебя кто-то появился. может не стоит? ты меня лучше знаешь.'
+    });
+  }
+
+  function beatPavelD25() {
+    if (STATE.beat_pavel_d25) return;
+    STATE.beat_pavel_d25 = true;
+    var c = findContact('pavel'); if (c) c.visible = true;
+    postMessage('pavel', {
+      kind: 'incoming',
+      senderName: 'Павел',
+      text: 'ну и ладно. удачи. я всегда был рядом когда тебе было сложно. помни.'
+    });
+  }
+
+  function beatMamaD20() {
+    if (STATE.beat_mama_d20) return;
+    STATE.beat_mama_d20 = true;
+    var c = findContact('mama'); if (c) c.visible = true;
+    postMessage('mama', {
+      kind: 'incoming',
+      senderName: 'мама',
+      text: 'доча, соседка спрашивает какой у тебя бизнес. я сказала что ты творческая, всё пишешь. она говорит это хорошо. у её дочки такой же бизнес, но та получает зарплату в мвд. но я тебя не сравниваю.'
+    });
+  }
+
+  function beatDenisD22() {
+    if (STATE.beat_denis_d22) return;
+    STATE.beat_denis_d22 = true;
+    var c = findContact('denis'); if (c) c.visible = true;
+    postMessage('denis', {
+      kind: 'incoming',
+      senderName: 'Денис',
+      text: 'марин, слышал про тебя от общих. гордимся. держись. кстати — парус-тур на выходных, присоединяйся.'
+    });
+  }
+
+  // Настя — параллельная arc коллеги-фаундера
+  function beatNastyaD6() {
+    if (STATE.beat_nastya_d6) return;
+    STATE.beat_nastya_d6 = true;
+    var c = findContact('nastya'); if (c) c.visible = true;
+    postMessage('nastya', {
+      kind: 'incoming',
+      senderName: 'Настя',
+      photo: 'img/events/nastya_desk.webp',
+      photoAlt: 'рабочий стол',
+      text: 'привет! я Настя, тоже фрилансер, мы вроде в одном чате в telegram были. хотела спросить — как ты справляешься с первыми неделями без офиса?'
+    });
+    setTimeout(function () {
+      postMessage('nastya', {
+        kind: 'incoming',
+        senderName: 'Настя',
+        text: 'у меня прям паника каждое утро. но я вот начала выписывать три задачи в день вместо десяти. помогает.'
+      });
+    }, 1100);
+  }
+
+  function beatNastyaD11() {
+    if (STATE.beat_nastya_d11) return;
+    STATE.beat_nastya_d11 = true;
+    var c = findContact('nastya'); if (c) c.visible = true;
+    postMessage('nastya', {
+      kind: 'incoming',
+      senderName: 'Настя',
+      text: 'ооо я сегодня закрыла второй проект. чувствую себя богиней. и одновременно засыпаю стоя. как оно у тебя?'
+    });
+  }
+
+  function beatNastyaD16() {
+    if (STATE.beat_nastya_d16) return;
+    STATE.beat_nastya_d16 = true;
+    var c = findContact('nastya'); if (c) c.visible = true;
+    postMessage('nastya', {
+      kind: 'incoming',
+      senderName: 'Настя',
+      photo: 'img/events/nastya_coworking.webp',
+      photoAlt: 'коворкинг',
+      text: 'слушай, думала. нам надо объединяться. одна хорошо, но вдвоём быстрее. может посидим, обсудим?'
+    });
+  }
+
+  function beatNastyaD20() {
+    if (STATE.beat_nastya_d20) return;
+    STATE.beat_nastya_d20 = true;
+    var c = findContact('nastya'); if (c) c.visible = true;
+    postMessage('nastya', {
+      kind: 'incoming',
+      senderName: 'Настя',
+      text: 'у меня тут проект на двух человек, клиент крупный. половину могу тебе отдать. $400 твои, только делай хорошо. интересно?'
+    });
+  }
+
+  function beatNastyaD25() {
+    if (STATE.beat_nastya_d25) return;
+    STATE.beat_nastya_d25 = true;
+    var c = findContact('nastya'); if (c) c.visible = true;
+    postMessage('nastya', {
+      kind: 'incoming',
+      senderName: 'Настя',
+      text: 'марин, я серьёзно думаю о партнёрстве. давай после месяца встретимся и обсудим. у меня есть план.'
+    });
+  }
+
+  function beatNastyaD30() {
+    if (STATE.beat_nastya_d30) return;
+    STATE.beat_nastya_d30 = true;
+    var c = findContact('nastya'); if (c) c.visible = true;
+    postMessage('nastya', {
+      kind: 'incoming',
+      senderName: 'Настя',
+      text: 'ты дожила. я горжусь. давай встретимся в воскресенье, я принесу вино и план на следующий месяц.'
+    });
   }
 
   // ========== Светка подружка (SPRINT 06) — гороскоп, голосовые, сплетни ==========
@@ -2082,6 +2629,13 @@
     }
   ];
 
+  // SPRINT 14.2 — Светка random photo pool
+  var SVETKA_PHOTOS = [
+    { src: 'img/events/svetka_phone.webp', alt: 'светка звонит' },
+    { src: 'img/events/svetka_drama.webp', alt: 'драма' },
+    { src: 'img/events/svetka_taro.webp', alt: 'карты таро' }
+  ];
+
   function svetkaBeat(key) {
     if (STATE[key]) return;
     STATE[key] = true;
@@ -2089,6 +2643,7 @@
     var deck = SVETKA_GOSSIP[0];
     var voiceLabel = pick(deck.intros);
     var gossip = pick(deck.gossip);
+    var photo = pick(SVETKA_PHOTOS);
     postMessage('svetka', {
       kind: 'incoming',
       senderName: 'Светка',
@@ -2098,6 +2653,8 @@
       postMessage('svetka', {
         kind: 'incoming',
         senderName: 'Светка',
+        photo: photo.src,
+        photoAlt: photo.alt,
         text: gossip
       });
     }, 1000);
@@ -2133,8 +2690,8 @@
     postMessage('mama', {
       kind: 'incoming',
       senderName: 'мама',
-      photo: 'img/events/desk_night.webp',
-      photoAlt: 'ночной стол',
+      photo: 'img/events/mama_pie.webp',
+      photoAlt: 'мамины пироги',
       text: 'ты там живая? звонков нет уже неделю. пирогов наготовила, приезжай в субботу.'
     });
     STATE._mama17_pending = true;
@@ -2147,6 +2704,8 @@
     postMessage('mama', {
       kind: 'incoming',
       senderName: 'мама',
+      photo: 'img/events/mama_letter.webp',
+      photoAlt: 'мамино письмо',
       text: 'доча, я скучаю. звони когда сможешь. хоть на 5 минут.'
     });
   }
@@ -2166,7 +2725,7 @@
 
   function beatKirillLove1() {
     if (STATE.beat_kirill_love_1) return;
-    if ((STATE.kirill_affection || 0) < 5) return;
+    if ((STATE.kirill_affection || 0) < 3) return;
     if (STATE.kirill_blocked) return;
     STATE.beat_kirill_love_1 = true;
     var c = findContact('kirill'); if (c) c.visible = true;
@@ -2192,11 +2751,13 @@
     }, 2400);
     postMessage('scratch', { kind: 'system', text: 'Кирилл написал что-то странное · открой чат' });
     STATE._kirill_love1_pending = true;
+    STATE.kirill_invite_active = true;
+    STATE.kirill_invite_expires_day = (STATE.day || 1) + 2;
   }
 
   function beatKirillLove2() {
     if (STATE.beat_kirill_love_2) return;
-    if ((STATE.kirill_affection || 0) < 6) return;
+    if ((STATE.kirill_affection || 0) < 4) return;
     if (STATE.kirill_blocked) return;
     STATE.beat_kirill_love_2 = true;
     var c = findContact('kirill'); if (c) c.visible = true;
@@ -2214,12 +2775,14 @@
       });
     }, 1100);
     STATE._kirill_love2_pending = true;
+    STATE.kirill_invite_active = true;
+    STATE.kirill_invite_expires_day = (STATE.day || 1) + 2;
     postMessage('scratch', { kind: 'system', text: 'Кирилл зовёт без повода · открой чат' });
   }
 
   function beatKirillLoveFinal() {
     if (STATE.beat_kirill_love_final) return;
-    if ((STATE.kirill_affection || 0) < 7) return;
+    if ((STATE.kirill_affection || 0) < 5) return;
     if (STATE.kirill_blocked) return;
     STATE.beat_kirill_love_final = true;
     var c = findContact('kirill'); if (c) c.visible = true;
@@ -2267,19 +2830,23 @@
     var c = findContact('denis'); if (c) c.visible = true;
     var texts = {
       3: 'марин, задолбал сидеть дома. поехали на регату в субботу? море, ветер, никаких писем',
-      6: 'слушай, в кино идём? новый фильм — хвалят. отвлечёшься на два часа',
-      9: 'перестань работать хоть на день. гулять поехали на набережную? я занесу вино'
+      6: 'слушай, давай на кофе сходим? нашёл новое место на углу, тебе понравится. час, не больше',
+      9: 'перестань работать хоть на день. гулять поехали на набережную? я занесу вино',
+      15: 'марина, парус-тур в субботу. 5 человек, яхта, вечер. место есть для тебя',
+      27: 'новый год через 3 дня. у меня на квартире посиделки, не пропусти'
     };
     var photos = {
       3: 'img/events/regatta.webp',
-      6: 'img/events/cinema_ticket.webp',
-      9: 'img/events/street_window.webp'
+      6: 'img/events/denis_coffee_spot.webp',
+      9: 'img/events/street_window.webp',
+      15: 'img/events/denis_yacht.webp',
+      27: 'img/events/denis_new_year.webp'
     };
     postMessage('denis', {
       kind: 'incoming',
       senderName: 'Денис',
-      photo: photos[day],
-      photoAlt: day === 3 ? 'регата' : day === 6 ? 'кино' : 'набережная',
+      photo: photos[day] || 'img/events/street_window.webp',
+      photoAlt: day === 3 ? 'регата' : day === 6 ? 'кофейня' : day === 15 ? 'яхта' : day === 27 ? 'новый год' : 'гулянка',
       text: texts[day] || 'привет, как ты там?'
     });
     postMessage('scratch', { kind: 'system', text: 'Денис зовёт гулять · открой чат' });
@@ -2295,7 +2862,7 @@
     if (STATE.beat_olya) return;
     STATE.beat_olya = true;
     var c = findContact('olya'); if (c) c.visible = true;
-    postMessage('olya', { kind: 'incoming', senderName: 'Оля Петрова', text: 'Мариночка приветик! Это Оля Петрова, мы учились вместе в 11-Б. Помнишь меня?' });
+    postMessage('olya', { kind: 'incoming', senderName: 'Оля Петрова', photo: 'img/events/olya_pyramid.webp', photoAlt: 'клуб женщин', text: 'Мариночка приветик! Это Оля Петрова, мы учились вместе в 11-Б. Помнишь меня?' });
     setTimeout(function () {
       postMessage('olya', { kind: 'incoming', senderName: 'Оля Петрова', text: 'У меня появилась уникальная возможность для женщин которые хотят изменить жизнь и финансы. Можно я расскажу 5 минут?' });
     }, 900);
@@ -2325,7 +2892,7 @@
     if (STATE.beat_krypta) return;
     STATE.beat_krypta = true;
     var c = findContact('krypta'); if (c) c.visible = true;
-    postMessage('krypta', { kind: 'incoming', senderName: 'БРАТ крипта', text: 'БРАТ' });
+    postMessage('krypta', { kind: 'incoming', senderName: 'БРАТ крипта', photo: 'img/events/krypta_moon.webp', photoAlt: 'крипто-луна', text: 'БРАТ' });
     setTimeout(function () {
       postMessage('krypta', { kind: 'incoming', senderName: 'БРАТ крипта', text: 'СОЛАНА ЛЕТИТ 🚀🚀🚀 1000X ЭТОТ МЕСЯЦ' });
     }, 700);
@@ -2456,6 +3023,158 @@
     }
   }
 
+  // ========== SPRINT 14 — Guaranteed economy drain events ==========
+
+  function beatDrainCharger() {
+    if (STATE.beat_drain_charger) return;
+    STATE.beat_drain_charger = true;
+    STATE.cash -= 60;
+    postBank(-60, 'зарядка для ноутбука');
+    postMessage('scratch', {
+      kind: 'outgoing',
+      photo: 'img/events/charger_broken.webp',
+      photoAlt: 'сломанная зарядка',
+      text: 'зарядка сдохла. прямо посреди работы. новая — $60. без неё никак.'
+    });
+    postSystem('scratch', '⚡ −$60 · зарядка для ноутбука');
+  }
+
+  function beatDrainPhone() {
+    if (STATE.beat_drain_phone) return;
+    STATE.beat_drain_phone = true;
+    STATE.cash -= 80;
+    postBank(-80, 'ремонт экрана телефона');
+    postMessage('scratch', {
+      kind: 'outgoing',
+      photo: 'img/events/phone_cracked.webp',
+      photoAlt: 'треснувший экран',
+      text: 'уронила телефон. экран в паутине. без него нет связи с клиентами. ремонт $80.'
+    });
+    postSystem('scratch', '📱 −$80 · ремонт экрана');
+  }
+
+  function beatDrainDentist() {
+    if (STATE.beat_drain_dentist) return;
+    STATE.beat_drain_dentist = true;
+    STATE.cash -= 150;
+    STATE.hours = Math.max(0, STATE.hours - 2);
+    postBank(-150, 'стоматолог · срочный');
+    postMessage('scratch', {
+      kind: 'outgoing',
+      photo: 'img/events/dentist_receipt.webp',
+      photoAlt: 'чек стоматолога',
+      text: 'зуб. проснулась от боли в 5 утра. стоматолог $150, без вариантов. полдня потеряно.'
+    });
+    postSystem('scratch', '🦷 −$150 · −2h · стоматолог');
+  }
+
+  function beatDrainElectric() {
+    if (STATE.beat_drain_electric) return;
+    STATE.beat_drain_electric = true;
+    STATE.cash -= 100;
+    postBank(-100, 'электричество + интернет');
+    postMessage('scratch', {
+      kind: 'outgoing',
+      photo: 'img/events/electric_bill.webp',
+      photoAlt: 'квитанция',
+      text: 'пришёл счёт за электричество и интернет. $100. автосписание. ничего не сделаешь.'
+    });
+    postSystem('scratch', '💡 −$100 · коммуналка');
+  }
+
+  // ========== SPRINT 14 — Khozyaika arc enhancement ==========
+
+  // Pre-day-12: annoying beats
+  function beatKhozyaikaDay3Noise() {
+    if (STATE.beat_khozyaika_day3_noise) return;
+    STATE.beat_khozyaika_day3_noise = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    postMessage('khozyaika', {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      photo: 'img/events/khozyaika_noise.webp',
+      photoAlt: 'хозяйка у двери',
+      text: 'Марина, соседи с первого этажа жаловались на шум. Вы работаете после 23:00? Пожалуйста, тише печатайте на клавиатуре. У нас дом 1978 года, слышимость как в коммуналке. Я серьёзно.'
+    });
+    STATE.comfort = Math.max(0, STATE.comfort - 5);
+    postSystem('scratch', '−5 комфорт · хозяйка жалуется на шум');
+  }
+
+  function beatKhozyaikaDay5Electric() {
+    if (STATE.beat_khozyaika_day5_electric) return;
+    STATE.beat_khozyaika_day5_electric = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    postMessage('khozyaika', {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      photo: 'img/events/khozyaika_meters.webp',
+      photoAlt: 'электросчётчик',
+      text: 'Марина, вы сегодня снимаете показания электросчётчика? Я за ваш свет плачу, мне надо знать сколько. Скиньте фото. И сразу: почему розетка на кухне воняет? Вы что-то включали кроме чайника?'
+    });
+    STATE._khozyaika_electric_pending = true;
+  }
+
+  function beatKhozyaikaDay7Damage() {
+    if (STATE.beat_khozyaika_day7_damage) return;
+    STATE.beat_khozyaika_day7_damage = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    postMessage('khozyaika', {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      photo: 'img/events/khozyaika_damage.webp',
+      photoAlt: 'царапина на линолеуме',
+      text: 'Марина, я тут была у вас пока вы на работе. Обнаружила ЦАРАПИНУ на линолеуме в прихожей. Это было до вас или после? Мне важно для страховки.'
+    });
+    setTimeout(function () {
+      postMessage('khozyaika', {
+        kind: 'incoming',
+        senderName: 'Наталья Валерьевна',
+        text: 'И ещё — в ванной потёк кран. Вызовите сантехника сами, $50 за выезд. Я не обязана.'
+      });
+    }, 1000);
+    STATE.cash -= 50;
+    postBank(-50, 'сантехник по требованию хозяйки');
+    postSystem('scratch', '🔧 −$50 · хозяйка заставила вызвать сантехника');
+  }
+
+  function beatKhozyaikaDay9Chain() {
+    if (STATE.beat_khozyaika_day9_chain) return;
+    STATE.beat_khozyaika_day9_chain = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    postMessage('khozyaika', {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      photo: 'img/events/khozyaika_tarot.webp',
+      photoAlt: 'карты таро',
+      text: 'Марина, это ОЧЕНЬ ВАЖНО. Перешлите это сообщение пяти людям: «квартира, в которой живёт женщина-фаундер, накапливает карму неудач если не распространять энергию благодарности». Мне так психолог-астролог сказал. Она раньше работала в МЧС.'
+    });
+    STATE._khozyaika_chain_pending = true;
+  }
+
+  // Post-day-12: sweet beats
+  function beatKhozyaikaPost12(variant) {
+    var flagKey = 'beat_khozyaika_post12_' + variant;
+    if (STATE[flagKey]) return;
+    STATE[flagKey] = true;
+    var c = findContact('khozyaika'); if (c) c.visible = true;
+    var texts = {
+      flowers: 'Мариночка, надеюсь вы покушали сегодня. 🌸 Я вот вчера пирог с капустой пекла, думала про вас. Мурка тоже сидит и мурлычет — чувствует что вы хорошая. Держитесь, родная!',
+      quote1: 'Марина, видела мотивирующий пост: «Сильная женщина — не та что не плачет, а та что плачет и всё равно делает». Это про вас. 💪🌸 Вы справитесь, я чувствую.',
+      quote2: 'Мариночка, как дела? Я тут свечку за вас в церкви поставила. Не за квартиру — за вас лично. Мурка тоже передаёт привет 🐱 P.S. комод в порядке, не переживайте.'
+    };
+    // Photo only for quote2 ("свечку поставила") — matches khozyaika_sweet aesthetic
+    var msg = {
+      kind: 'incoming',
+      senderName: 'Наталья Валерьевна',
+      text: texts[variant] || texts.flowers
+    };
+    if (variant === 'quote2') {
+      msg.photo = 'img/events/khozyaika_sweet.webp';
+      msg.photoAlt = 'свечка и фото Мурки';
+    }
+    postMessage('khozyaika', msg);
+  }
+
   // ========== delayed callbacks (Pavel loan return) ==========
 
   function processPendingCallbacks(day) {
@@ -2511,7 +3230,8 @@
                 senderName: 'Кирилл',
                 text: 'привет. хочешь в кафе вечером? я угощаю, тебе ничего не надо'
               });
-              STATE._kirill_invite_pending = true;
+              STATE.kirill_invite_active = true;
+              STATE.kirill_invite_expires_day = (STATE.day || 1) + 2;
             }, 1800);
           }
         } else if (cb.type === 'khozyaika_fine') {
@@ -2538,6 +3258,20 @@
   }
 
   function fireDayBeats(day) {
+    // SPRINT 14 — guaranteed drain events (fire before story beats)
+    if (day === 3) beatDrainCharger();
+    if (day === 6) beatDrainPhone();
+    if (day === 8) beatDrainDentist();
+    if (day === 11) beatDrainElectric();
+    // SPRINT 14 — khozyaika pre-day-12 annoyance
+    if (day === 3) beatKhozyaikaDay3Noise();
+    if (day === 5) beatKhozyaikaDay5Electric();
+    if (day === 7) beatKhozyaikaDay7Damage();
+    if (day === 9) beatKhozyaikaDay9Chain();
+    // SPRINT 14 — khozyaika post-day-12 sweetness
+    if (day === 14) beatKhozyaikaPost12('flowers');
+    if (day === 17) beatKhozyaikaPost12('quote1');
+    if (day === 21) beatKhozyaikaPost12('quote2');
     // v2.1.1 — 30-day arc with tighter Khozyaika spam
     if (day === 2) { beatKhozyaikaDay2Komod(); beatPavelNightDay2(); }
     if (day === 3) { beatDenis(3); beatOlya(); }
@@ -2545,9 +3279,9 @@
     if (day === 5) { beatAnnaOffer(); beatPavelDay5(); beatTimConsultIntro(); }
     if (day === 10 && STATE.auto_reach_out) beatTimTier2Offer();
     if (day === 16 && STATE.auto_brief_lead) beatTimTier3Offer();
-    if (day === 22 && STATE.auto_send_offer) beatTimTier4Offer();
+    // (tier 4 removed — work_on_project stays manual)
     if (day === 28) beatTimCreator();
-    if (day === 6) { beatSosedIntro(); svetkaBeat('beat_svetka_day6'); }
+    if (day === 6) { beatSosedIntro(); svetkaBeat('beat_svetka_day6'); beatDenis(6); }
     if (day === 7) beatPavelDay7();
     if (day === 8) beatMama6();
     if (day === 9) { beatLenaDay9(); beatPavelDay9(); beatKirillIntro(); beatDenis(9); }
@@ -2557,6 +3291,23 @@
     if (day === 18) svetkaBeat('beat_svetka_day18');
     if (day === 22) svetkaBeat('beat_svetka_day22');
     if (day === 26) svetkaBeat('beat_svetka_day26');
+    // Sprint 07 late-game density
+    if (day === 13) beatPavelD13();
+    if (day === 17) { beatPavelD17(); beatOlyaRetry(); }
+    if (day === 18) beatKryptaRetry();
+    if (day === 20) beatMamaD20();
+    if (day === 21) beatPavelD21();
+    if (day === 22) { beatKhozyaikaD22(); beatDenisD22(); }
+    if (day === 24) beatOlyaFinal();
+    if (day === 25) { beatPavelD25(); beatKryptaFinal(); }
+    if (day === 27) beatKhozyaikaD27();
+    // Настя параллельная arc
+    if (day === 6) beatNastyaD6();
+    if (day === 11) beatNastyaD11();
+    if (day === 16) beatNastyaD16();
+    if (day === 20) beatNastyaD20();
+    if (day === 25) beatNastyaD25();
+    if (day === 30) beatNastyaD30();
     if (day === 11) beatKhozyaika2(); // тикток эзотерика
     if (day === 12) beatKhozyaikaRescue(); // BLOCK N — rescue beat, mandatory
     if (day === 14) beatPavel();
@@ -2589,8 +3340,8 @@
     STATE.cash -= 45; // daily: метро + кофе + подписки + мелочи + вайбы
     if (STATE.hunger == null) STATE.hunger = 100;
     if (STATE.comfort == null) STATE.comfort = 60;
-    STATE.hunger = Math.max(0, STATE.hunger - 20); // faster hunger decay
-    STATE.comfort = Math.max(0, STATE.comfort - 8); // faster comfort decay
+    STATE.hunger = Math.max(0, STATE.hunger - 25); // SPRINT 14 — even more punishing
+    STATE.comfort = Math.max(0, STATE.comfort - 10); // SPRINT 14 — increased decay
 
     // Low hunger → sharp energy drain (stronger v2.1.1)
     if (STATE.hunger < 30) {
@@ -2602,7 +3353,7 @@
       postMessage('scratch', { kind: 'system', text: '🍔 на пределе · руки дрожат · не могу работать нормально' });
     }
     // Low comfort → impulsive purchase + more frequent
-    if (STATE.comfort < 30 && Math.random() < 0.55) {
+    if (STATE.comfort < 35 && Math.random() < 0.60) { // SPRINT 14 — more impulse
       var impulse = 50 + Math.floor(Math.random() * 50);
       STATE.cash -= impulse;
       postBank(-impulse, 'импульсивная покупка · комфорт низкий');
@@ -2697,15 +3448,22 @@
       });
     }
 
-    // SPRINT 06 — Tim automation tiers (passive income per day)
+    // SPRINT 13 — Tim automation tiers (3 tiers, narrative as Marina POV)
     if (STATE.auto_reach_out) {
       STATE.leads = (STATE.leads || 0) + 1;
-      postMessage('scratch', { kind: 'system', text: '🤖 автофарминг · +1 холодный лид' });
+      postMessage('scratch', { kind: 'outgoing', text: pick(AUTO_REACH_NARRATIVE) });
+      // Visual: ghost-fire reach_out button with particle burst
+      setTimeout(function () {
+        try { funnelBurstReachOut(true); } catch (e) {}
+      }, 600);
     }
     if (STATE.auto_brief_lead && STATE.leads > 0) {
       STATE.leads -= 1;
       STATE.qualified_leads = (STATE.qualified_leads || 0) + 1;
-      postMessage('scratch', { kind: 'system', text: '🤖 AI созвон · +1 квалифицированный лид' });
+      postMessage('scratch', { kind: 'outgoing', text: pick(AUTO_BRIEF_NARRATIVE) });
+      setTimeout(function () {
+        try { spawnParticle({ from: 'brief_lead', to: 'send_offer', kind: 'red', icon: '📞', duration: 700 }); } catch (e) {}
+      }, 900);
     }
     if (STATE.auto_send_offer && STATE.qualified_leads > 0 && !STATE.bank_locked) {
       STATE.qualified_leads -= 1;
@@ -2729,13 +3487,10 @@
         status: 'active'
       });
       postBank(autoUpfront, 'AI оффер принят · upfront');
-      postMessage('scratch', { kind: 'system', text: '🤖 AI оффер · контракт подписан автоматически' });
-    }
-    if (STATE.auto_work_project && STATE.active_projects.length > 0) {
-      var ap = STATE.active_projects[0];
-      ap.work_units_done = (ap.work_units_done || 0) + 0.5;
-      ap.progress = Math.min(100, (ap.progress || 0) + 15);
-      postMessage('scratch', { kind: 'system', text: '🤖 AI копирайтер · проект #' + ap.id + ' прогресс +15%' });
+      postMessage('scratch', { kind: 'outgoing', text: pick(AUTO_OFFER_NARRATIVE) });
+      setTimeout(function () {
+        try { spawnParticle({ from: 'send_offer', to: 'work_on_project', kind: 'red', icon: '📄', duration: 700 }); } catch (e) {}
+      }, 1200);
     }
     // Lena lifeline — available only after day 14 (after khozyaika rescue).
     // До day 12 player должен дойти в минусе — тогда хозяйка спасает. После 14 —
@@ -2991,6 +3746,15 @@
       if (id === 'anna' && STATE._anna_pending) {
         renderAnnaChoice();
       }
+      // Mobile: slide chat view in
+      if (window.innerWidth <= 640) {
+        document.body.classList.add('chat-open');
+      }
+    });
+
+    // Mobile chat back button — slide back to list view
+    $(document).on('click', '#chat-back', function () {
+      document.body.classList.remove('chat-open');
     });
 
     // Dock button click
@@ -3010,7 +3774,7 @@
         case 'eat_out': actEatOut(); break;
         case 'shopping': actShopping(); break;
         case 'date_kirill': actDateKirill(); break;
-        case 'hangout_denis': actHangoutDenis(); break;
+        case 'hangout_denis': openChat('denis'); break; // always route to chat (per-event pricing)
         case 'end_day':
           if (window.MarinaAudio) window.MarinaAudio.dayEnd();
           actEndDay();
@@ -3060,6 +3824,7 @@
     version: VERSION,
     _state: function () { return STATE; },
     _reset: function () { clearState(); location.reload(); },
+    _actLamp: actLamp,
     currentChat: currentChat
   };
 
