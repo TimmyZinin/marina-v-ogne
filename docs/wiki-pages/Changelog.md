@@ -2,7 +2,30 @@
 
 Reverse-chronological. Newest at top.
 
-## 2.8.0 (in progress) — SPRINT 49 + 51
+## 2.8.0 (in progress) — SPRINT 49 + 50 + 51
+
+### SPRINT 50 (TR + PT-BR content) — shipped
+
+- **Add:** `i18n/tr.json` — full Istanbul/Melis adaptation (757 keys, exact parity with ru.json)
+  - Heroine: Melis (Kadıköy founder)
+  - Bank: Garanti (vs Т-Банк)
+  - Plot mechanic: MASAK kripto incelemesi (vs 115-ФЗ)
+  - Characters: Zeynep, Ayşe, Neriman Hanım, Kemal, Deniz, Kerem, Elif, Aslı, Selin
+  - Brands: Trendyol, BiTaksi, BİM, LCW, Gratis, Boğaziçi, Bodrum yat gezisi
+  - Love ending: "Melis AI" studio, Bebek office, $40k MRR
+  - Religious/political sensitivity: alcohol scenes normalized, gender roles balanced
+- **Add:** `i18n/pt.json` — full São Paulo/Marina adaptation (757 keys, exact parity)
+  - Heroine: Marina (Vila Madalena founder)
+  - Bank: Nubank (vs Т-Банк)
+  - Plot mechanic: COAF / revisão PIX (vs 115-ФЗ)
+  - Characters: Camila (Rio), Beatriz, Dona Lúcia, Pedro, Diego, Caio, Letícia, Natália, Sofia
+  - Brands: Renner, Sephora BR, Pão de Açúcar, iFood, 99, USP/FGV
+  - Voice: jeitinho brasileiro, paulistano, warm-witty self-deprecating
+  - Love ending: "Marina AI" studio em Pinheiros, Caio CTO
+- **Add:** Locale-RU.md + Locale-EN.md + Locale-TR.md + Locale-PT.md wiki pages with Mermaid diagrams
+- **Delivered:** 4 locales × 757 keys = 3028 translated strings total
+
+
 
 ### SPRINT 51 (viral mechanic) — shipped
 
