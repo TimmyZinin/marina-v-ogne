@@ -4448,6 +4448,13 @@
     save();
     $('#rescue-overlay').hide();
     renderDock();
+    // SPRINT 51 — inject viral share card on rescue (primary surface)
+    try {
+      if (window.MarinaViral) {
+        var $rescueCard = $('#rescue-overlay .overlay-card')[0];
+        if ($rescueCard) window.MarinaViral.renderCardForSurface('rescue', STATE, $rescueCard);
+      }
+    } catch (e) {}
   }
 
   function showWin() {
@@ -4485,6 +4492,13 @@
       );
       $card.find('.overlay-body').after($love);
     }
+    // SPRINT 51 — inject viral share card on win (secondary surface)
+    try {
+      if (window.MarinaViral) {
+        $card.find('.viral-share-block').remove();
+        window.MarinaViral.renderCardForSurface('win', STATE, $card[0]);
+      }
+    } catch (e) {}
     $('#win-overlay').show();
   }
 
@@ -4493,6 +4507,14 @@
     save();
     track('game_lost', { reason: reason, day: STATE.day });
     $('#lose-reason').text(reasonText);
+    // SPRINT 51 — inject viral share card on lose (PRIMARY surface — highest reach)
+    try {
+      if (window.MarinaViral) {
+        var $loseCard = $('#lose-overlay .overlay-card');
+        $loseCard.find('.viral-share-block').remove();
+        window.MarinaViral.renderCardForSurface('lose', STATE, $loseCard[0]);
+      }
+    } catch (e) {}
 
     // SPRINT 28 — set hero image based on lose reason
     var $card = $('#lose-overlay .overlay-card');

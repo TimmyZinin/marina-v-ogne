@@ -1167,5 +1167,55 @@
         "it happens."
       ]
     }
+  },
+  "viral": {
+    "card": {
+      "title": "🔥 Marina on Fire",
+      "win_title": "Marina made it",
+      "lose_title": "studio burned",
+      "rescue_title": "saved at the last minute",
+      "first_project": "first project shipped",
+      "surviving": "Marina surviving",
+      "projects": "projects",
+      "love": "love",
+      "burnout": "burnout",
+      "rare": "1-in-20 outcome.",
+      "this_is_fine": "this is fine."
+    },
+    "cta": {
+      "share_button": "share",
+      "share_friend": "show one friend"
+    },
+    "toast": {
+      "copied": "Copied to clipboard",
+      "copy_failed": "Copy failed — select manually"
+    },
+    "modal": {
+      "title": "Send to one friend"
+    },
+    "platform": {
+      "copy": "Copy",
+      "native": "Share"
+    },
+    "prompt": {
+      "name": "What should we call you in the link? (optional)"
+    },
+    "tim": {
+      "share_lose": "this isn't the end. show someone who'd recognize themselves here.",
+      "share_rescue": "you're hanging in. show one person.",
+      "share_win": "you made it. rare. show someone.",
+      "share_first_project": "first project shipped. show a friend — she needs to see this right now.",
+      "share_end_of_day": "another day survived. show a friend — she's going through it too.",
+      "share_default": "send this to one friend. not your feed. one person."
+    },
+    "referral": {
+      "hero_eyebrow": "🎁 {name} invited you · free game inside"
+    },
+    "challenge": {
+      "hero_win": "🏆 {name} survived day 30. Rare. Can you?",
+      "hero_lose": "🔥 {name} burned out on day {d}. Can you last longer?",
+      "hero_rescue": "🚨 {name} was saved on day {d}. Will someone save you?",
+      "hero_default": "🎁 {name} made it to day {d}. Can you go further?"
+    }
   }
 }
