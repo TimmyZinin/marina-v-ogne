@@ -607,88 +607,85 @@
     var $buttons = $('#dock-buttons').empty();
 
     // v2.1 — все кнопки ВСЕГДА видимы. disabled если недоступны. Badges счётчики.
+    // SPRINT 49 — labels/costs/reasons via tStr() with RU literal fallback
     var actions = [];
     if (STATE.lamp_on) {
       // Воронка: искать → созвон → оффер → работать → ночная работа
       actions.push({
         id: 'reach_out',
-        label: (STATE.auto_reach_out ? '🤖 ' : '') + 'искать клиентов',
-        cost: STATE.auto_reach_out ? 'AI делает' : '1ч · −5⚡',
+        label: (STATE.auto_reach_out ? '🤖 ' : '') + tStr('action.reach_out.label', 'искать клиентов'),
+        cost: STATE.auto_reach_out ? tStr('action.reach_out.cost_auto', 'AI делает') : tStr('action.reach_out.cost', '1ч · −5⚡'),
         auto: STATE.auto_reach_out,
         disabled: STATE.auto_reach_out || STATE.hours < COST.reach_out.h || STATE.energy < COST.reach_out.e,
-        reason: STATE.auto_reach_out ? 'AI автоматизирован' : (STATE.hours < COST.reach_out.h ? 'нет часов' : 'нет энергии'),
+        reason: STATE.auto_reach_out ? tStr('action.reach_out.reason_auto', 'AI автоматизирован') : (STATE.hours < COST.reach_out.h ? tStr('action.reach_out.reason_no_hours', 'нет часов') : tStr('action.reach_out.reason_no_energy', 'нет энергии')),
         primary: !STATE.auto_reach_out && STATE.hours > 0,
         hideOnMobile: STATE.hours < COST.reach_out.h
       });
       actions.push({
         id: 'brief_lead',
-        label: (STATE.auto_brief_lead ? '🤖 ' : '') + 'созвон с лидом',
-        cost: STATE.auto_brief_lead ? 'AI делает' : '1ч · −3⚡',
+        label: (STATE.auto_brief_lead ? '🤖 ' : '') + tStr('action.brief_lead.label', 'созвон с лидом'),
+        cost: STATE.auto_brief_lead ? tStr('action.brief_lead.cost_auto', 'AI делает') : tStr('action.brief_lead.cost', '1ч · −3⚡'),
         auto: STATE.auto_brief_lead,
         badge: !STATE.auto_brief_lead && STATE.leads > 0 ? STATE.leads : null,
         badgeHot: STATE.leads > 0,
         disabled: STATE.auto_brief_lead || STATE.leads < 1 || STATE.hours < COST.brief_lead.h || STATE.energy < COST.brief_lead.e,
-        reason: STATE.auto_brief_lead ? 'AI автоматизирован' : (STATE.leads < 1 ? 'нет лидов' : (STATE.hours < COST.brief_lead.h ? 'нет часов' : 'нет энергии')),
+        reason: STATE.auto_brief_lead ? tStr('action.brief_lead.reason_auto', 'AI автоматизирован') : (STATE.leads < 1 ? tStr('action.brief_lead.reason_no_leads', 'нет лидов') : (STATE.hours < COST.brief_lead.h ? tStr('action.brief_lead.reason_no_hours', 'нет часов') : tStr('action.brief_lead.reason_no_energy', 'нет энергии'))),
         hideOnMobile: STATE.hours < COST.brief_lead.h
       });
       actions.push({
         id: 'send_offer',
-        label: (STATE.auto_send_offer ? '🤖 ' : '') + 'отправить оффер',
-        cost: STATE.auto_send_offer ? 'AI делает' : '1ч',
+        label: (STATE.auto_send_offer ? '🤖 ' : '') + tStr('action.send_offer.label', 'отправить оффер'),
+        cost: STATE.auto_send_offer ? tStr('action.send_offer.cost_auto', 'AI делает') : tStr('action.send_offer.cost', '1ч'),
         auto: STATE.auto_send_offer,
         badge: !STATE.auto_send_offer && STATE.qualified_leads > 0 ? STATE.qualified_leads : null,
         badgeHot: STATE.qualified_leads > 0,
         disabled: STATE.auto_send_offer || STATE.qualified_leads < 1 || STATE.hours < COST.send_offer.h || STATE.bank_locked,
-        reason: STATE.auto_send_offer ? 'AI автоматизирован' : (STATE.bank_locked ? 'счёт заблокирован' : (STATE.qualified_leads < 1 ? 'нет брифов' : 'нет часов')),
+        reason: STATE.auto_send_offer ? tStr('action.send_offer.reason_auto', 'AI автоматизирован') : (STATE.bank_locked ? tStr('action.send_offer.reason_bank_locked', 'счёт заблокирован') : (STATE.qualified_leads < 1 ? tStr('action.send_offer.reason_no_qualified', 'нет брифов') : tStr('action.send_offer.reason_no_hours', 'нет часов'))),
         hideOnMobile: STATE.hours < COST.send_offer.h
       });
       actions.push({
-        id: 'work_on_project', label: 'делать работу', cost: '2ч · −5⚡',
+        id: 'work_on_project', label: tStr('action.work_on_project.label', 'делать работу'), cost: tStr('action.work_on_project.cost', '2ч · −5⚡'),
         badge: STATE.active_projects.length > 0 ? STATE.active_projects.length : null,
         disabled: STATE.active_projects.length === 0 || STATE.hours < COST.work_on_project.h || STATE.energy < COST.work_on_project.e,
-        reason: STATE.active_projects.length === 0 ? 'нет проектов' : (STATE.hours < COST.work_on_project.h ? 'нет часов' : 'нет энергии'),
+        reason: STATE.active_projects.length === 0 ? tStr('action.work_on_project.reason_no_projects', 'нет проектов') : (STATE.hours < COST.work_on_project.h ? tStr('action.work_on_project.reason_no_hours', 'нет часов') : tStr('action.work_on_project.reason_no_energy', 'нет энергии')),
         hideOnMobile: STATE.hours < COST.work_on_project.h
       });
       // SPRINT 40 — night work mutually exclusive with day work.
-      // Available ONLY when work day is over (hours < required for day work).
-      // Day mode: 'делать работу' enabled, 'ночная работа' hidden.
-      // Night mode (no hours left): 'делать работу' hidden, 'ночная работа' enabled.
       var dayWorkAvail = STATE.hours >= COST.work_on_project.h;
       actions.push({
-        id: 'work_night', label: '🌙 ночная работа', cost: '−15⚡ · −15💚',
+        id: 'work_night', label: tStr('action.work_night.label', '🌙 ночная работа'), cost: tStr('action.work_night.cost', '−15⚡ · −15💚'),
         disabled: STATE.active_projects.length === 0 || STATE.day < 3 || STATE.energy < COST.work_night.e || dayWorkAvail,
-        reason: STATE.day < 3 ? 'доступно с дня 3' : (STATE.active_projects.length === 0 ? 'нет проектов' : (dayWorkAvail ? 'сначала рабочий день' : 'мало энергии')),
+        reason: STATE.day < 3 ? tStr('action.work_night.reason_too_early', 'доступно с дня 3') : (STATE.active_projects.length === 0 ? tStr('action.work_night.reason_no_projects', 'нет проектов') : (dayWorkAvail ? tStr('action.work_night.reason_day_work_first', 'сначала рабочий день') : tStr('action.work_night.reason_no_energy', 'мало энергии'))),
         hideOnMobile: STATE.active_projects.length === 0 || STATE.day < 3 || dayWorkAvail
       });
-      // Еда + отдых + шопинг
-      // SPRINT 35 — eating allowed even when hours=0 (evening meal, free of work hours)
+      // Еда + отдых + шопинг — SPRINT 35 — eating allowed even when hours=0
       actions.push({
         id: 'eat_home',
-        label: '🍝 поесть дома',
-        cost: STATE.hours >= 1 ? '1ч · −$15' : 'ужин · −$15',
+        label: tStr('action.eat_home.label', '🍝 поесть дома'),
+        cost: STATE.hours >= 1 ? tStr('action.eat_home.cost_day', '1ч · −$15') : tStr('action.eat_home.cost_evening', 'ужин · −$15'),
         badge: STATE.hunger < 30 ? '!' : null,
         badgePulse: STATE.hunger < 30,
         disabled: STATE.cash < COST.eat_home.c || STATE.bank_locked,
-        reason: STATE.bank_locked ? 'счёт заблокирован' : 'не хватает денег'
+        reason: STATE.bank_locked ? tStr('action.eat_home.reason_bank_locked', 'счёт заблокирован') : tStr('action.eat_home.reason_no_money', 'не хватает денег')
       });
       actions.push({
         id: 'eat_out',
-        label: '🥗 кафе',
-        cost: STATE.hours >= 1 ? '1ч · −$35' : 'ужин · −$35',
+        label: tStr('action.eat_out.label', '🥗 кафе'),
+        cost: STATE.hours >= 1 ? tStr('action.eat_out.cost_day', '1ч · −$35') : tStr('action.eat_out.cost_evening', 'ужин · −$35'),
         disabled: STATE.cash < COST.eat_out.c || STATE.bank_locked,
-        reason: STATE.bank_locked ? 'счёт заблокирован' : 'не хватает денег'
+        reason: STATE.bank_locked ? tStr('action.eat_out.reason_bank_locked', 'счёт заблокирован') : tStr('action.eat_out.reason_no_money', 'не хватает денег')
       });
       actions.push({
-        id: 'rest', label: '☕ перерыв', cost: '1ч · +30⚡',
+        id: 'rest', label: tStr('action.rest.label', '☕ перерыв'), cost: tStr('action.rest.cost', '1ч · +30⚡'),
         badge: STATE.energy < 30 ? '!' : null,
         badgePulse: STATE.energy < 30,
         disabled: STATE.hours < COST.rest.h || STATE.energy >= 100 || STATE.coffee_stacks >= 4,
-        reason: STATE.energy >= 100 ? 'энергия максимум' : (STATE.coffee_stacks >= 4 ? 'кофе перелит' : 'нет часов')
+        reason: STATE.energy >= 100 ? tStr('action.rest.reason_max_energy', 'энергия максимум') : (STATE.coffee_stacks >= 4 ? tStr('action.rest.reason_too_much_coffee', 'кофе перелит') : tStr('action.rest.reason_no_hours', 'нет часов'))
       });
       actions.push({
-        id: 'shopping', label: '🛍 шопинг', cost: '2ч · −$80',
+        id: 'shopping', label: tStr('action.shopping.label', '🛍 шопинг'), cost: tStr('action.shopping.cost', '2ч · −$80'),
         disabled: STATE.day < 5 || STATE.cash < COST.shopping.c || STATE.hours < COST.shopping.h || STATE.bank_locked,
-        reason: STATE.day < 5 ? 'с дня 5' : (STATE.bank_locked ? 'счёт заблокирован' : 'не хватает ресурсов'),
+        reason: STATE.day < 5 ? tStr('action.shopping.reason_too_early', 'с дня 5') : (STATE.bank_locked ? tStr('action.shopping.reason_bank_locked', 'счёт заблокирован') : tStr('action.shopping.reason_no_resources', 'не хватает ресурсов')),
         hideOnMobile: STATE.day < 5 || STATE.cash < COST.shopping.c || STATE.bank_locked
       });
       // Social actions — только если анлокнуты
@@ -696,34 +693,33 @@
         var kirillInviteActive = !!STATE.kirill_invite_active;
         actions.push({
           id: 'date_kirill',
-          label: '💔 свидание (Кирилл)',
-          cost: '3ч · −10⚡',
+          label: tStr('action.date_kirill.label', '💔 свидание (Кирилл)'),
+          cost: tStr('action.date_kirill.cost', '3ч · −10⚡'),
           badge: kirillInviteActive ? '!' : null,
           badgePulse: kirillInviteActive,
           disabled: !kirillInviteActive || STATE.hours < COST.date_kirill.h || STATE.energy < COST.date_kirill.e || (STATE.kirill_date_count >= 4 && !STATE.bank_locked),
-          reason: !kirillInviteActive ? 'Кирилл сейчас не зовёт' : (STATE.energy < COST.date_kirill.e ? 'нет энергии' : 'не хватает часов'),
+          reason: !kirillInviteActive ? tStr('action.date_kirill.reason_no_invite', 'Кирилл сейчас не зовёт') : (STATE.energy < COST.date_kirill.e ? tStr('action.date_kirill.reason_no_energy', 'нет энергии') : tStr('action.date_kirill.reason_no_hours', 'не хватает часов')),
           hideOnMobile: !kirillInviteActive
         });
       }
       if (STATE.beat_denis3 || STATE.beat_denis6 || STATE.beat_denis9 || STATE.beat_denis15) {
-        // Denis actions only via reply chips in chat (per-event pricing)
         var hasDenisPending = STATE._denis3_pending || STATE._denis6_pending || STATE._denis9_pending || STATE._denis15_pending || STATE._denis27_pending;
         actions.push({
-          id: 'hangout_denis', label: '🎉 с Денисом', cost: hasDenisPending ? 'ответь в чат' : 'ждёт приглашения',
+          id: 'hangout_denis', label: tStr('action.hangout_denis.label', '🎉 с Денисом'),
+          cost: hasDenisPending ? tStr('action.hangout_denis.cost_pending', 'ответь в чат') : tStr('action.hangout_denis.cost_waiting', 'ждёт приглашения'),
           badge: hasDenisPending ? '!' : null,
           badgePulse: hasDenisPending,
           disabled: !hasDenisPending,
-          reason: 'ответь на приглашение Дениса в чате',
+          reason: tStr('action.hangout_denis.reason_no_invite', 'ответь на приглашение Дениса в чате'),
           hideOnMobile: !hasDenisPending
         });
       }
       // SPRINT 34 — when hours=0, end_day becomes the only meaningful action.
-      // Force-primary + bigger label to make it obvious.
       var hoursOver = STATE.hours <= 0;
       actions.push({
         id: 'end_day',
-        label: hoursOver ? '🌙 лечь спать — день закончен' : '🌙 лечь спать',
-        cost: 'конец дня',
+        label: hoursOver ? tStr('action.end_day.label_forced', '🌙 лечь спать — день закончен') : tStr('action.end_day.label', '🌙 лечь спать'),
+        cost: tStr('action.end_day.cost', 'конец дня'),
         disabled: false,
         primary: hoursOver
       });
@@ -763,7 +759,7 @@
     });
 
     if (!STATE.lamp_on) {
-      var $lamp = $('<button class="dock-btn">').attr('data-action', 'lamp').text('включить компьютер');
+      var $lamp = $('<button class="dock-btn">').attr('data-action', 'lamp').text(tStr('action.lamp.label', 'включить компьютер'));
       $buttons.append($lamp);
     }
 
@@ -782,7 +778,7 @@
         photoAlt: 'утро после ночной работы',
         text: tPickOr('text.morning.hangover', HANGOVER_MORNINGS)
       });
-      postSystem('scratch', '☕ после ночной работы · энергия не восстановилась');
+      postSystem('scratch', tStr('system.hangover_note', '☕ после ночной работы · энергия не восстановилась'));
       return;
     }
     var h = STATE.hunger, e = STATE.energy, m = STATE.comfort;
@@ -818,12 +814,12 @@
     var h = STATE.hunger || 100;
     var e = STATE.energy || 100;
     var m = STATE.comfort || 60;
-    var status = 'теледрам v' + VERSION;
-    if (STATE.bank_locked) status = '🔒 счёт заблокирован';
-    else if (h < 20) status = '🍔 очень голодна';
-    else if (e < 20) status = '⚡ на пределе';
-    else if (m < 20) status = '💔 грустит';
-    else if (h < 35 || e < 35 || m < 30) status = '😮‍💨 устала';
+    var status = tStr('brand.version_prefix', 'теледрам v') + VERSION;
+    if (STATE.bank_locked) status = tStr('brand.status.bank_locked', '🔒 счёт заблокирован');
+    else if (h < 20) status = tStr('brand.status.very_hungry', '🍔 очень голодна');
+    else if (e < 20) status = tStr('brand.status.exhausted', '⚡ на пределе');
+    else if (m < 20) status = tStr('brand.status.sad', '💔 грустит');
+    else if (h < 35 || e < 35 || m < 30) status = tStr('brand.status.tired', '😮‍💨 устала');
     $sub.text(status);
 
     // Avatar grayscale when comfort low
@@ -843,26 +839,26 @@
 
     if (STATE.bank_locked) {
       var daysLeft = Math.max(0, (STATE.bank_locked_until || STATE.day) - STATE.day);
-      msg = '🔒 СЧЁТ ЗАБЛОКИРОВАН ПО 115-ФЗ · ещё ' + daysLeft + ' дн.';
+      msg = tStr('crisis.bank_locked', '🔒 СЧЁТ ЗАБЛОКИРОВАН ПО 115-ФЗ · ещё {daysLeft} дн.').replace('{daysLeft}', daysLeft);
       cls = 'crit';
     } else if (h != null && h < 15) {
-      msg = '🍔 МАРИНА ГОЛОДАЕТ · энергия падает быстро · поешь';
+      msg = tStr('crisis.starving', '🍔 МАРИНА ГОЛОДАЕТ · энергия падает быстро · поешь');
       cls = 'crit';
     } else if (e < 15) {
-      msg = '⚡ МАРИНА НА ПРЕДЕЛЕ · перерыв срочно';
+      msg = tStr('crisis.burnout', '⚡ МАРИНА НА ПРЕДЕЛЕ · перерыв срочно');
       cls = 'crit';
     } else if (c < -500) {
-      msg = '💰 БАЛАНС КРИТИЧЕСКИЙ · −$' + Math.abs(c) + ' · сдай проект или теряешь квартиру';
+      msg = tStr('crisis.broke', '💰 БАЛАНС КРИТИЧЕСКИЙ · −${absCash} · сдай проект или теряешь квартиру').replace('{absCash}', Math.abs(c));
       cls = 'crit';
     } else if (m != null && m < 15) {
-      msg = '💔 КОМФОРТ ОБНУЛИЛСЯ · ты сгораешь · шопинг/еда/друзья';
+      msg = tStr('crisis.comfort_zero', '💔 КОМФОРТ ОБНУЛИЛСЯ · ты сгораешь · шопинг/еда/друзья');
       cls = 'crit';
     } else if (h != null && h < 50) {
       // SPRINT 23 — earlier hunger warn so daily food becomes mandatory
-      msg = '🍔 голодно · хочется настоящей еды';
+      msg = tStr('crisis.hungry_warn', '🍔 голодно · хочется настоящей еды');
       cls = 'warn';
     } else if (e < 30) {
-      msg = '⚡ устала · пора отдохнуть';
+      msg = tStr('crisis.tired_warn', '⚡ устала · пора отдохнуть');
       cls = 'warn';
     }
 
