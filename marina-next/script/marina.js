@@ -2286,6 +2286,18 @@
             postSystem('scratch', 'проект #' + p.id + ' сдан · клиент принял');
             postBank(payment, 'финал по проекту #' + p.id);
             save(); renderDock();
+            // SPRINT 51 — share moment on FIRST project delivered (~45% player reach)
+            if (STATE.delivered_projects === 1 && window.MarinaViral) {
+              try {
+                var $scratchThread = document.getElementById('chat-thread');
+                if ($scratchThread && STATE.current_chat === 'scratch') {
+                  var shareBlock = document.createElement('div');
+                  shareBlock.className = 'bubble system viral-first-project-inline';
+                  $scratchThread.appendChild(shareBlock);
+                  window.MarinaViral.renderCardForSurface('first_project', STATE, shareBlock);
+                }
+              } catch (e) {}
+            }
           }, 500);
         }
         save(); renderDock();
@@ -2496,6 +2508,18 @@
         // SPRINT 22 — milestone events every 5 days
         if (STATE.day % 5 === 0 && STATE.day <= 30) {
           track('day_reached', { day: STATE.day, cash: STATE.cash, delivered: STATE.delivered_projects });
+          // SPRINT 51 — end-of-day share opportunity at 5/10/15/20/25 (soft, non-modal)
+          if (window.MarinaViral && STATE.day >= 5 && STATE.day < 30) {
+            try {
+              var $scratchForShare = document.getElementById('chat-thread');
+              if ($scratchForShare && STATE.current_chat === 'scratch') {
+                var dayShareBlock = document.createElement('div');
+                dayShareBlock.className = 'bubble system viral-day-milestone-inline';
+                $scratchForShare.appendChild(dayShareBlock);
+                window.MarinaViral.renderCardForSurface('end_of_day', STATE, dayShareBlock);
+              }
+            } catch (e) {}
+          }
         }
         // SPRINT 14 — overnight energy recovery depends on hunger + hangover
         var overnightRecovery = 20;
