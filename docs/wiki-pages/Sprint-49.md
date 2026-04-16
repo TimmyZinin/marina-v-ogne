@@ -21,15 +21,27 @@ graph LR
 ## Day 1 — Infrastructure (DONE this session)
 
 - [x] **i18n-runtime.js** — `MarinaI18n.{t,tArray,tPick,tPlural,init,setLang,detectSystem,getLang}` API
-- [x] **ru.json** — source of truth, namespaces: `lead.*`, `bubble.*`, `contact.*`, `text.*`, `action.*`, `brand.*`, `crisis.*`, `system.*` (~250 keys так far)
+- [x] **ru.json** — source of truth, **545 lines, 409 leaf keys**: `lead.*`, `bubble.*`, `contact.*`, `text.*`, `action.*`, `brand.*`, `crisis.*`, `system.*`, `ui.*`, `overlay.*`, `meta.*`, `landing.*`
 - [x] **lead.js** — Cyrillic literals → `t()` calls; `lang` field added to payload
 - [x] **bubbles.js** — chat headers, empty states, funnel labels, contact name lookup → i18n
 - [x] **marina-audio.js** — no user-facing strings (only comments, skipped)
 - [x] **Backend pre-check** — `marshall.timzinin.com/quest-api/lead` accepts `lang` field (200 OK)
-- [ ] **marina.js refactor** — IN PROGRESS (4930 lines, 945 Cyrillic, ~700 strings to extract)
-- [ ] **play.html** — data-i18n attributes on overlays, dock, footer
-- [ ] **index.html** — auto-detect script + lang switcher in nav
-- [ ] **APP_VERSION → 2.8.0** + cache-bust на all `?v=` query strings
+- [x] **marina.js partial refactor:**
+  - [x] tStr() / tPickOr() / currentLang() helpers added near pick() at :550
+  - [x] track() wrapper auto-injects `lang` into all Umami events
+  - [x] All 19 `pick(TEXT_BANK)` callsites → `tPickOr('text.bank', TEXT_BANK)` with RU fallback
+  - [x] renderDock — all 12 action labels + costs + disable reasons via tStr() with RU fallback
+  - [x] renderBrandStatus — version prefix + 5 status states via tStr()
+  - [x] renderCrisisBanner — 7 banner messages via tStr() with `{daysLeft}` `{absCash}` interpolation
+  - [x] postMorningMonologue hangover system note
+- [x] **play.html** — data-i18n attributes on overlays (intro/win/lose/rescue), folder tabs, brand, footer, dock, chat, lang-overlay
+- [x] **play.html** — lang-overlay markup (4 buttons) + footer 🌐 lang switcher + bootstrap script
+- [x] **index.html** — full data-i18n coverage: nav, hero, gallery, about, features, characters, FAQ, footer
+- [x] **index.html** — language `<select>` switcher in nav + auto-detect head script (avoids FOUC)
+- [x] **APP_VERSION → 2.8.0-i18n-wip** + all `?v=2.8.0` query strings updated
+- [ ] **marina.js beat-functions** — ⏳ NOT STARTED (~600 dialogue strings in 68 beats, lines 2557-3530) — biggest remaining work
+- [ ] **marina.js endings** — ⏳ NOT STARTED (win/lose/love narratives, ~50 strings, lines 4317-4470)
+- [ ] **marina.js inline system/notify/project strings** — ⏳ partial
 
 ## Day 2 — RU regression gate (BLOCKING merge)
 
