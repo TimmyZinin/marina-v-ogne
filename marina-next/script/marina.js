@@ -17,7 +17,7 @@
   // SPRINT 18 — split versions
   // APP_VERSION: cache-bust + UI display, changes every deploy
   // SAVE_SCHEMA_VERSION: persistence shape, only changes when state structure changes
-  var APP_VERSION = '2.7.0';
+  var APP_VERSION = '2.8.0-i18n-wip';
   var SAVE_SCHEMA_VERSION = 1; // bump only on state shape change
   var VERSION = APP_VERSION; // legacy alias kept for existing refs
   var STATE_KEY = 'marina-fire:v2.0:state';
@@ -551,11 +551,39 @@
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  // SPRINT 49 — i18n shim helpers
+  // tStr(key, fallback): resolve string via MarinaI18n.t() with literal fallback
+  // tPickOr(key, fallbackArr): resolve random-pick text bank via i18n with constant array fallback
+  // currentLang(): get active locale, default 'ru'
+  function tStr(key, fallback) {
+    if (window.MarinaI18n && typeof window.MarinaI18n.t === 'function') {
+      var v = window.MarinaI18n.t(key);
+      if (typeof v === 'string' && v.indexOf('[MISSING:') !== 0) return v;
+    }
+    return fallback;
+  }
+  function tPickOr(key, fallbackArr) {
+    if (window.MarinaI18n && typeof window.MarinaI18n.tPick === 'function') {
+      var v = window.MarinaI18n.tPick(key);
+      if (typeof v === 'string' && v.indexOf('[MISSING:') !== 0) return v;
+    }
+    return pick(fallbackArr);
+  }
+  function currentLang() {
+    if (window.MarinaI18n && typeof window.MarinaI18n.getLang === 'function') {
+      return window.MarinaI18n.getLang() || 'ru';
+    }
+    return 'ru';
+  }
+
   // SPRINT 22 — Umami custom event tracking (privacy-respecting)
+  // SPRINT 49 — auto-injects {lang} into every event payload
   function track(event, data) {
     try {
+      var d = data || {};
+      d.lang = currentLang();
       if (window.umami && typeof window.umami.track === 'function') {
-        window.umami.track(event, data || {});
+        window.umami.track(event, d);
       }
     } catch (e) {}
   }
@@ -752,7 +780,7 @@
         kind: 'outgoing',
         photo: 'img/events/hangover_desk.webp',
         photoAlt: 'утро после ночной работы',
-        text: pick(HANGOVER_MORNINGS)
+        text: tPickOr('text.morning.hangover', HANGOVER_MORNINGS)
       });
       postSystem('scratch', '☕ после ночной работы · энергия не восстановилась');
       return;
@@ -765,21 +793,21 @@
         kind: 'outgoing',
         photo: h < 15 ? 'img/events/marina_hungry.webp' : undefined,
         photoAlt: 'пустой холодильник',
-        text: pick(HUNGRY_MORNINGS)
+        text: tPickOr('text.morning.hungry', HUNGRY_MORNINGS)
       });
       return;
     }
     if (m != null && m < 25) {
-      postMessage('scratch', { kind: 'outgoing', text: pick(SAD_MORNINGS) });
+      postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.morning.sad', SAD_MORNINGS) });
       return;
     }
     if (e < 30) {
-      postMessage('scratch', { kind: 'outgoing', text: pick(TIRED_MORNINGS) });
+      postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.morning.tired', TIRED_MORNINGS) });
       return;
     }
     // Fine morning — only 25% chance (not every day)
     if (Math.random() < 0.25) {
-      postMessage('scratch', { kind: 'outgoing', text: pick(FINE_MORNINGS) });
+      postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.morning.fine', FINE_MORNINGS) });
     }
   }
 
@@ -1385,7 +1413,7 @@
             STATE.comfort = Math.min(100, STATE.comfort + 25); // SPRINT 33 — Denis raises comfort too
             STATE.hours = Math.max(0, STATE.hours - 2);
             postBank(-dCost, 'с Денисом');
-            postMessage('scratch', { kind: 'outgoing', text: pick(HANGOUT_DENIS_TEXT) });
+            postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.hangout_denis', HANGOUT_DENIS_TEXT) });
             postMessage('scratch', { kind: 'system', text: '−$' + dCost + ' · +60⚡ · +25💚 · −2h · день ожил' });
           } else {
             postOutgoing('denis', 'не сегодня. работа.');
@@ -2107,17 +2135,17 @@
     funnelBurstReachOut(hit);
 
     runAction(function () {
-      postOutgoing('scratch', pick(REACH_OUT_TEXT.outgoing));
+      postOutgoing('scratch', tPickOr('text.reach_out.outgoing', REACH_OUT_TEXT.outgoing));
 
       if (hit) {
         STATE.leads += 1;
         setTimeout(function () {
           postSystem('scratch', '+1 лид · кто-то ответил');
-          postIncoming('scratch', pick(REACH_OUT_TEXT.hit_reply), 'незнакомый контакт');
+          postIncoming('scratch', tPickOr('text.reach_out.hit_reply', REACH_OUT_TEXT.hit_reply), tStr('system.reach_out.unknown_contact', 'незнакомый контакт'));
         }, 600);
       } else {
         setTimeout(function () {
-          postSystem('scratch', pick(REACH_OUT_TEXT.miss_silence));
+          postSystem('scratch', tPickOr('text.reach_out.miss_silence', REACH_OUT_TEXT.miss_silence));
         }, 600);
       }
     });
@@ -2133,7 +2161,7 @@
     spawnParticle({ from: 'brief_lead', to: 'send_offer', kind: 'red', icon: '📞', duration: 700 });
 
     runAction(function () {
-      postOutgoing('scratch', pick(BRIEF_TEXT));
+      postOutgoing('scratch', tPickOr('text.brief', BRIEF_TEXT));
       setTimeout(function () {
         postSystem('scratch', '+1 квалифицированный лид · можно отправить оффер');
       }, 600);
@@ -2240,7 +2268,7 @@
       if (STATE._hangover_active) workProgress = Math.floor(workProgress * 0.75);
       p.progress = Math.min(100, (p.progress || 0) + workProgress);
       p.work_units_done = (p.work_units_done || 0) + 1; // daytime = 1 unit
-      postOutgoing('scratch', STATE.hunger < 50 ? pick(WORK_TEXT_HUNGRY) : pick(WORK_TEXT));
+      postOutgoing('scratch', STATE.hunger < 50 ? tPickOr('text.work_hungry', WORK_TEXT_HUNGRY) : tPickOr('text.work', WORK_TEXT));
       setTimeout(function () {
         var extra = '';
         if (STATE.hunger < 30) extra = ' · 🍔 голод снижает прогресс';
@@ -2276,7 +2304,7 @@
     STATE.energy = Math.min(100, STATE.energy + gain);
 
     runAction(function () {
-      postOutgoing('scratch', pick(REST_TEXT));
+      postOutgoing('scratch', tPickOr('text.rest', REST_TEXT));
       setTimeout(function () {
         if (gain >= 30) postSystem('scratch', '+' + gain + ' энергии');
         else postSystem('scratch', 'кофе перелит · +' + gain + ' энергии');
@@ -2298,7 +2326,7 @@
     STATE.comfort = Math.min(100, STATE.comfort + COST.eat_home.m);
 
     runAction(function () {
-      postOutgoing('scratch', pick(EAT_HOME_TEXT));
+      postOutgoing('scratch', tPickOr('text.eat_home', EAT_HOME_TEXT));
       setTimeout(function () {
         var hint = hCost === 0 ? ' · ужин перед сном' : '';
         postSystem('scratch', '+' + COST.eat_home.f + ' сытости · −$' + COST.eat_home.c + hint);
@@ -2316,7 +2344,7 @@
     STATE.comfort = Math.min(100, STATE.comfort + COST.eat_out.m);
 
     runAction(function () {
-      postOutgoing('scratch', pick(EAT_OUT_TEXT));
+      postOutgoing('scratch', tPickOr('text.eat_out', EAT_OUT_TEXT));
       setTimeout(function () {
         var hint2 = hCost2 === 0 ? ' · ужин в кафе перед сном' : '';
         postSystem('scratch', '+' + COST.eat_out.f + ' сытости · +' + COST.eat_out.m + ' комфорт · −$' + COST.eat_out.c + hint2);
@@ -2335,7 +2363,7 @@
     STATE.comfort = Math.min(100, STATE.comfort + COST.shopping.m);
 
     runAction(function () {
-      postOutgoing('scratch', pick(SHOPPING_TEXT));
+      postOutgoing('scratch', tPickOr('text.shopping', SHOPPING_TEXT));
       setTimeout(function () {
         postSystem('scratch', '+' + COST.shopping.m + ' комфорт · −$' + COST.shopping.c);
         postBank(-COST.shopping.c, 'маленький шопинг');
@@ -2364,7 +2392,7 @@
     }
 
     runAction(function () {
-      postOutgoing('scratch', pick(DATE_KIRILL_TEXT));
+      postOutgoing('scratch', tPickOr('text.date_kirill', DATE_KIRILL_TEXT));
       setTimeout(function () {
         postSystem('scratch', '+' + COST.date_kirill.f + ' сытости · +' + COST.date_kirill.m + ' комфорт · −3h · −10⚡');
       }, 400);
@@ -2406,7 +2434,7 @@
       } else {
         p.progress = Math.min(100, (p.progress || 0) + nightProgress);
         p.work_units_done = (p.work_units_done || 0) + 1.5; // night = 1.5 units
-        postOutgoing('scratch', pick(WORK_NIGHT_TEXT));
+        postOutgoing('scratch', tPickOr('text.work_night', WORK_NIGHT_TEXT));
       }
       setTimeout(function () {
         var unitsTxt = ' · ' + p.work_units_done.toFixed(1) + '/' + totalUnits + ' units';
@@ -4179,7 +4207,7 @@
     // SPRINT 13 — Tim automation tiers (3 tiers, narrative as Marina POV)
     if (STATE.auto_reach_out) {
       STATE.leads = (STATE.leads || 0) + 1;
-      postMessage('scratch', { kind: 'outgoing', text: pick(AUTO_REACH_NARRATIVE) });
+      postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.auto.reach_narrative', AUTO_REACH_NARRATIVE) });
       // Visual: ghost-fire reach_out button with particle burst
       setTimeout(function () {
         try { funnelBurstReachOut(true); } catch (e) {}
@@ -4188,7 +4216,7 @@
     if (STATE.auto_brief_lead && STATE.leads > 0) {
       STATE.leads -= 1;
       STATE.qualified_leads = (STATE.qualified_leads || 0) + 1;
-      postMessage('scratch', { kind: 'outgoing', text: pick(AUTO_BRIEF_NARRATIVE) });
+      postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.auto.brief_narrative', AUTO_BRIEF_NARRATIVE) });
       setTimeout(function () {
         try { spawnParticle({ from: 'brief_lead', to: 'send_offer', kind: 'red', icon: '📞', duration: 700 }); } catch (e) {}
       }, 900);
@@ -4215,7 +4243,7 @@
         status: 'active'
       });
       postBank(autoUpfront, 'AI оффер принят · upfront');
-      postMessage('scratch', { kind: 'outgoing', text: pick(AUTO_OFFER_NARRATIVE) });
+      postMessage('scratch', { kind: 'outgoing', text: tPickOr('text.auto.offer_narrative', AUTO_OFFER_NARRATIVE) });
       setTimeout(function () {
         try { spawnParticle({ from: 'send_offer', to: 'work_on_project', kind: 'red', icon: '📄', duration: 700 }); } catch (e) {}
       }, 1200);
