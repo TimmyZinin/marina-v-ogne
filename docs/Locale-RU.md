@@ -101,6 +101,6 @@ git log -p marina-next/i18n/ru.json | head -100
 
 ## Wiki sibling pages
 
-- [Locale: EN](Locale-EN) — Brooklyn NYC
-- [Locale: TR](Locale-TR) — Istanbul / Melis
-- [Locale: PT](Locale-PT) — São Paulo
+- [Locale: EN](Locale-EN.md) — Brooklyn NYC
+- [Locale: TR](Locale-TR.md) — Istanbul / Melis
+- [Locale: PT](Locale-PT.md) — São Paulo

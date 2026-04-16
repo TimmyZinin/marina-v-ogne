@@ -9,29 +9,29 @@
 ## Pages
 
 ### Architecture & Systems
-- [Architecture](Architecture) — system overview, file dependencies
-- [State Schema](State-Schema) — defaultState() fields, save/migration
-- [i18n System](i18n-System) — runtime, key namespaces, fallback chain
-- [Analytics](Analytics) — Umami events, SQL dashboard
-- [Viral Mechanic](Viral-Mechanic) — share surface hierarchy, K-factor model
+- [Architecture](Architecture.md) — system overview, file dependencies
+- [State Schema](State-Schema.md) — defaultState() fields, save/migration
+- [i18n System](i18n-System.md) — runtime, key namespaces, fallback chain
+- [Analytics](Analytics.md) — Umami events, SQL dashboard
+- [Viral Mechanic](Viral-Mechanic.md) — share surface hierarchy, K-factor model
 
 ### Localization
-- [Cultural Adaptation](Cultural-Adaptation) — beat-by-beat matrix, mentality framework
-- [Locale: RU](Locale-RU) — Марина · Москва · Т-Банк · 115-ФЗ
-- [Locale: EN](Locale-EN) — Marina · Brooklyn NYC · Chase · IRS 1099
-- [Locale: TR](Locale-TR) — Melis · Istanbul · Garanti · MASAK
-- [Locale: PT-BR](Locale-PT) — Marina · São Paulo · Nubank · COAF/PIX
+- [Cultural Adaptation](Cultural-Adaptation.md) — beat-by-beat matrix, mentality framework
+- [Locale: RU](Locale-RU.md) — Марина · Москва · Т-Банк · 115-ФЗ
+- [Locale: EN](Locale-EN.md) — Marina · Brooklyn NYC · Chase · IRS 1099
+- [Locale: TR](Locale-TR.md) — Melis · Istanbul · Garanti · MASAK
+- [Locale: PT-BR](Locale-PT.md) — Marina · São Paulo · Nubank · COAF/PIX
 
 ### Visual & Brand
-- [Hero Image](Hero-Image) — "This is Fine" rework, Gemini nano-banana pipeline
+- [Hero Image](Hero-Image.md) — "This is Fine" rework, Gemini nano-banana pipeline
 
 ### Operations
-- [Run Book](Run-Book) — deploy, OG cache invalidation, regression tests
-- [Glossary](Glossary) — beat / surface / K-factor / MASAK / etc.
+- [Run Book](Run-Book.md) — deploy, OG cache invalidation, regression tests
+- [Glossary](Glossary.md) — beat / surface / K-factor / MASAK / etc.
 
 ### Sprints
-- [Changelog](Changelog) — reverse-chronological sprint log
-- [Sprint 49](Sprint-49) — i18n infra + EN content (in progress)
+- [Changelog](Changelog.md) — reverse-chronological sprint log
+- [Sprint 49](Sprint-49.md) — i18n infra + EN content (in progress)
 - Sprint 50 — TR + PT-BR content (planned)
 - Sprint 51 — Hero rework + viral mechanic (planned)
 
